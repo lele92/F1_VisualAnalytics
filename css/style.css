@@ -1,0 +1,25 @@
+#chart > svg{
+    background-color: #323639;
+}
+
+line.tickline {
+    stroke: #999999;
+    stroke-width:2;
+}
+
+text.gp {
+    fill: #999999;
+}
+
+text.driver {
+    fill: #999999
+}
+
+polyline.results {
+    fill: none;
+    stroke-width: 5;
+}
+
+g > .position-text {
+    fill: white;
+}
