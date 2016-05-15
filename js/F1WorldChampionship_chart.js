@@ -1,9 +1,9 @@
 const WINDOW_DIM = getWindowDim();
-const WIDTH = 2500;
+const WIDTH = 2700;
 //const HEIGHT = WINDOW_DIM.height;
 const HEIGHT = 1500;
 const SCALES = {};
-const DRIVERS_X = 250;
+const DRIVERS_X = 300;
 const GPS_Y = 20;
 const INSETS = {
 	'top': 75,
@@ -11,7 +11,10 @@ const INSETS = {
 	'bottom': 50,
 	'left': 50
 }
+
 const CIRCLE_RADIUS = 15;
+const GP_SHAPE_WIDTH = 100;
+const GP_SHAPE_HEIGHT = 30;
 
 var races = [];
 var drivers = [];
@@ -27,7 +30,7 @@ window.onload = function() {
 }
 
 function buildViz() {
-	confScales(drivers,races);
+	confScales();
 
 	var viz = d3.select("#chart")
 		.append("svg")
@@ -36,31 +39,59 @@ function buildViz() {
 
 	addTickLines(viz);
 	addGPLabels(viz);
-	addDriversLabels(viz);
+	addDriversElements(viz);
 	addDriverResultsPolylines(viz);
-	for (i in drivers) {
-		addPositionCircles(viz,drivers[i].driverId,drivers[i].position,drivers[i].results);
+	for (var i in drivers) {
+		addPositionElements(viz,drivers[i].driverId,drivers[i].position,drivers[i].results);
 	}
 
 }
 
-function addPositionCircles(viz,driverId,driverFinalPosition,res) {
+function addPositionElements(viz, driverId, driverFinalPosition, res) {
 	viz.selectAll("g.position."+driverId)
 		.data(res)
 		.enter()
 		.append("g")
-		.attr('class','position '+driverId);
+		.attr('class','position '+driverId)
+		.attr('transform',function(d) {
+				return "translate("+SCALES.xGPs(parseInt(d.round))+","+SCALES.y(d.Results[0].position)+")";
+			});
 
 	viz.selectAll("g.position."+driverId)
 		.append("circle")
+		.filter(function(d) {
+			return true; //todo: cerchio se posizione in classifica parziale invariata
+		})
 		.attr('class','position-circle')
-		.attr('cx', function(d) {
-			return SCALES.xGPs(parseInt(d.round))
-		})
-		.attr('cy', function(d) {
-			return SCALES.y(d.Results[0].position)
-		})
 		.attr('r', CIRCLE_RADIUS)
+		.style("fill", function(d) {
+			return SCALES.colors(parseInt(driverFinalPosition));
+		});
+
+	viz.selectAll("g.position."+driverId)
+		.append("path")
+		.filter(function(d) {
+			return false; //todo: triangle-up se posizione in classifica parziale migliorata
+		})
+		.attr("d", d3.svg.symbol().type("triangle-up").size(function() {
+				return Math.pow(CIRCLE_RADIUS*2,2);
+			})
+		)
+		.attr('class','position-triangle-up')
+		.style("fill", function(d) {
+			return SCALES.colors(parseInt(driverFinalPosition));
+		});
+
+	viz.selectAll("g.position."+driverId)
+		.append("path")
+		.filter(function(d) {
+			return false; //todo: triangle-down se posizione in classifica parziale peggiorata
+		})
+		.attr("d", d3.svg.symbol().type("triangle-down").size(function() {
+				return Math.pow(CIRCLE_RADIUS*2,2);
+			})
+		)
+		.attr('class','position-triangle-down')
 		.style("fill", function(d) {
 			return SCALES.colors(parseInt(driverFinalPosition));
 		});
@@ -68,17 +99,29 @@ function addPositionCircles(viz,driverId,driverFinalPosition,res) {
 	viz.selectAll("g.position."+driverId)
 		.append('text')
 		.attr('class','position-text')
-		.attr('x',function(d) {
-			return SCALES.xGPs(parseInt(d.round))
-		})
-		.attr('y', function(d) {
-			return SCALES.y(d.Results[0].position)
-		})
 		.attr('text-anchor', 'middle')
 		.attr('dominant-baseline', 'central')
 		.text(function(d) {
 			return d.Results[0].position;
 		})
+
+	viz.selectAll("g.position."+driverId+" > .position-circle","g.position."+driverId+" > .position-triangle-up","g.position."+driverId+" > .position-triangle-down")
+		.attr("stroke", function(d) {
+			//todo: da reimplementare con uno switch
+			if (d.Results[0].status != "Finished") {
+				return "red";
+			} else {
+				return SCALES.colors(parseInt(driverFinalPosition));
+			};
+		})
+		.attr("stroke-width", function(d) {
+			//todo: da reimplementare con uno switch
+			if (d.Results[0].status != "Finished") {
+				return 5;
+			} else {
+				return 0;
+			};
+		});
 }
 
 function addDriverResultsPolylines(viz) {
@@ -91,11 +134,11 @@ function addDriverResultsPolylines(viz) {
 			var pts = []
 
 			if (d.results) {
-				pts[0] = DRIVERS_X-75 + ',' + SCALES.y(parseInt(d.position));
-				pts[1] = DRIVERS_X+50 + ',' + SCALES.y(parseInt(d.position));
+				pts[0] = DRIVERS_X-125 + ',' + SCALES.y(parseInt(d.position));
+				pts[1] = DRIVERS_X-75 + ',' + SCALES.y(parseInt(d.position));
 				for (var i=0; i< d.results.length; i++) {
 					//console.log("round: "+ d.results[i].round + " - position: " + d.results[i].Results[0].position);
-					pts[i+1] = SCALES.xGPs(d.results[i].round) + ',' + SCALES.y(d.results[i].Results[0].position);
+					pts[i+2] = SCALES.xGPs(d.results[i].round) + ',' + SCALES.y(d.results[i].Results[0].position);
 				}
 			}
 			return pts.join(' ');
@@ -126,37 +169,60 @@ function addTickLines(viz) {
 }
 
 function addGPLabels(viz) {
-	viz.selectAll("text.gp")
+	viz.selectAll("g.gp-element")
 		.data(races)
 		.enter()
-		.append('text')
-		.attr('class','gp')
-		.attr('x',function(d) {
-			return SCALES.xGPs(d.round);
+		.append('g')
+		.attr('class','gp-element')
+		.attr('transform',function(d) {
+			return "translate("+SCALES.xGPs(d.round)+","+GPS_Y+")";
+		});
+
+	viz.selectAll("g.gp-element")
+		.data(races)
+		.append('rect')
+		.attr('class','gp-rect')
+		.attr('transform',"translate("+(-GP_SHAPE_WIDTH/2)+","+(-GPS_Y)+")")
+		.attr('height',GP_SHAPE_HEIGHT)
+		.attr('width',GP_SHAPE_WIDTH)
+		.text(function(d) {
+			return d.Circuit.Location.country;
 		})
-		.attr('y', GPS_Y)
-		.attr('text-anchor', 'start')
+
+	viz.selectAll("g.gp-element")
+		.data(races)
+		.append('text')
+		.attr('class','gp-label')
+		.attr('text-anchor', 'middle')
 		.text(function(d) {
 			return d.Circuit.Location.country;
 		})
 }
 
-function addDriversLabels(viz) {
-	viz.selectAll("text.driver")
+function addDriversElements(viz) {
+	viz.selectAll("g.driver-element")
 		.data(drivers)
 		.enter()
-		.append('text')
-		.attr('class','driver')
-		.attr('x', INSETS.left)
-		.attr('y', function(data) {
-			return SCALES.y(parseInt(data.position));
+		.append("g")
+		.attr("transform",function(data) {
+			return "translate("+INSETS.left+","+SCALES.y(parseInt(data.position))+")"
 		})
+		.attr('class','driver-element');
+
+	viz.selectAll("g.driver-element")
+		.data(drivers)
+		.append('text')
+		.attr('class','driver-label')
 		.text(function(data) {
-			return data.name;
+			return data.familyName;
 		})
 		.style('fill', function(d){
 			return SCALES.colors(parseInt(d.position))
-		})
+		});
+
+	//viz.selectAll("g.driver-element")
+	//	.data(drivers)
+	//	.append('rect')
 }
 
 function confScales() {
@@ -166,7 +232,7 @@ function confScales() {
 
 	SCALES.y = d3.scale.linear()
 		//todo: aggiungere limite superiore del dominio
-		.domain([1, 21]) //il dominio parte da 1 e non da 0 così possiamo utilizzare direttamente le posizioni della classifica finale (che partono da 1 ovviamente)
+		.domain([1, 21]) //il dominio parte da 1 e non da 0 cosï¿½ possiamo utilizzare direttamente le posizioni della classifica finale (che partono da 1 ovviamente)
 		.range([INSETS.top, HEIGHT - INSETS.bottom]); //todo: da migliorare
 
 	SCALES.colors = d3.scale.category20();
