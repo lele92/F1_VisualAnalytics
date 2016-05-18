@@ -17,15 +17,15 @@ const GP_SHAPE_HEIGHT = 30;
 
 const CIRCLES = {
 	'radius': {
-		"plain": 15,
-		'highlighted':20,
-		'dimmed': 10
+		"plain": 0,
+		'highlighted':15,
+		'dimmed': 0
 	}
 };
 
 const PATH_STROKE = {
-	'plain': 10,
-	'highlighted': 20,
+	'plain': 7,
+	'highlighted': 15,
 	'dimmed': 3
 };
 
@@ -37,6 +37,7 @@ const HIGHLIGHT_STATUS_CLASSES = {
 
 var races = [];
 var drivers = [];
+var fixedHighlight = [];
 
 window.onload = function() {
 	//todo: per adesso non vengono usate le API e quindi non ci sono chiamate ajax
@@ -74,7 +75,7 @@ function addPositionElements(viz, driverId, driverFinalPosition, res) {
 		.attr('class','position '+driverId+" "+HIGHLIGHT_STATUS_CLASSES.plain)
 		.attr('transform',function(d) {
 				return "translate("+SCALES.xGPs(parseInt(d.round))+","+SCALES.y(d.Results[0].position)+")";
-		});
+		})
 
 	viz.selectAll("g.position."+driverId)
 		.append("circle")
@@ -146,7 +147,7 @@ function addDriverResultsPath(viz) {
 
 			if (d.results) {
 				pts[0] = "M"+(DRIVERS_X-125)+ ' ' +(SCALES.y(parseInt(d.position)));
-				pts[1] = "L"+(DRIVERS_X-75) + ' ' + (SCALES.y(parseInt(d.position)));
+				pts[1] = "L"+(DRIVERS_X-75) + ' ' + (SCALES.y(parseInt(d.position))); //todo: aggiungere curva bezier
 				for (var i=0; i< d.results.length; i++) {
 					//console.log("round: "+ d.results[i].round + " - position: " + d.results[i].Results[0].position);
 					pts[i+2] = "S"+ (SCALES.xGPs(d.results[i].round)-65) + ' ' + (SCALES.y(d.results[i].Results[0].position)) + ", " +SCALES.xGPs(d.results[i].round) + ' ' + SCALES.y(d.results[i].Results[0].position);
@@ -156,6 +157,19 @@ function addDriverResultsPath(viz) {
 		})
 		.style('stroke', function(d,i) {
 			return SCALES.colors(parseInt(d.position));
+		})
+		.on('mouseover', function(d) {
+			if (!fixedHighlight.indexOf(d.driverId) > -1) {
+				var selectedElem = d3.select(this);
+				highlight(viz, d.driverId, selectedElem);
+			}
+		})
+		.on('mouseout', function(d) {
+			if (!fixedHighlight.indexOf(d.driverId) > -1) {
+				var selectedElem = d3.select(this);
+				unhighlight(viz, d.driverId, selectedElem);
+			}
+
 		})
 		.append("title")
 		.text(function(d) { 
@@ -169,7 +183,7 @@ function addTickLines(viz) {
 		.enter()
 		.append('line')
 		.attr('class','tickline')
-		.style('stroke-width', CIRCLES.radius.plain*2)
+		.style('stroke-width', 20)
 		.attr('x1', function(d) {
 			return SCALES.xGPs(d.round);
 		})
@@ -228,11 +242,12 @@ function addDriversElements(viz) {
 			//todo: si può implementare meglio
 			var selectedElem = d3.select(this);
 			if(selectedElem.classed(HIGHLIGHT_STATUS_CLASSES.plain) || selectedElem.classed(HIGHLIGHT_STATUS_CLASSES.dimmed)) {
-				highlight(viz, d.driverId, selectedElem)
+				highlight(viz, d.driverId, selectedElem);
+				fixedHighlight.push(d.driverId);
 			} else {
-				unhighlight(viz, d.driverId, selectedElem)
+				unhighlight(viz, d.driverId, selectedElem);
+				fixedHighlight.splice(fixedHighlight.indexOf(d.driverId), 1);
 			}
-
 		});
 
 	viz.selectAll("g.driver-element")
