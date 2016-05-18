@@ -3,8 +3,11 @@
 }
 
 line.tickline {
-    stroke: #999999;
-    stroke-width:4;
+    stroke: #3b4044;
+}
+
+g.position > .position-circle, g.position > .position-triangle-up g.position > .position-triangle-down {
+    stroke-width:5;
 }
 
 text.gp-label {
@@ -32,7 +35,7 @@ text.driver-label {
 
 polyline.results {
     fill: none;
-    stroke-width: 5;
+    stroke-width: 6;
 }
 
 g > .position-text {
@@ -52,5 +55,13 @@ g > .position-text {
     stroke-opacity:1;
 
 
+}
+
+.dimmed-elem {
+    opacity: 0.4;
+}
+
+g.driver-element:hover{
+    cursor: pointer;
 }
 

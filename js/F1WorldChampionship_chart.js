@@ -12,9 +12,28 @@ const INSETS = {
 	'left': 50
 }
 
-const CIRCLE_RADIUS = 15;
 const GP_SHAPE_WIDTH = 100;
 const GP_SHAPE_HEIGHT = 30;
+
+const CIRCLES = {
+	'radius': {
+		"plain": 15,
+		'highlighted':20,
+		'dimmed': 10
+	}
+};
+
+const PATH_STROKE = {
+	'plain': 10,
+	'highlighted': 20,
+	'dimmed': 3
+};
+
+const HIGHLIGHT_STATUS_CLASSES = {
+	'plain': 'plain-elem',
+	'highlighted': 	'highlighted-elem',
+	'dimmed': 'dimmed-elem'
+};
 
 var races = [];
 var drivers = [];
@@ -35,12 +54,12 @@ function buildViz() {
 	var viz = d3.select("#chart")
 		.append("svg")
 		.attr('width',WIDTH)
-		.attr('height',HEIGHT);
+		.attr('height',HEIGHT)
 
 	addTickLines(viz);
 	addGPLabels(viz);
 	addDriversElements(viz);
-	addDriverResultsPolylines(viz);
+	addDriverResultsPath(viz);
 	for (var i in drivers) {
 		addPositionElements(viz,drivers[i].driverId,drivers[i].position,drivers[i].results);
 	}
@@ -48,14 +67,14 @@ function buildViz() {
 }
 
 function addPositionElements(viz, driverId, driverFinalPosition, res) {
-	viz.selectAll("g.position."+driverId)
+	viz.selectAll("g.position."+driverId+"."+HIGHLIGHT_STATUS_CLASSES.plain)
 		.data(res)
 		.enter()
 		.append("g")
-		.attr('class','position '+driverId)
+		.attr('class','position '+driverId+" "+HIGHLIGHT_STATUS_CLASSES.plain)
 		.attr('transform',function(d) {
 				return "translate("+SCALES.xGPs(parseInt(d.round))+","+SCALES.y(d.Results[0].position)+")";
-			});
+		});
 
 	viz.selectAll("g.position."+driverId)
 		.append("circle")
@@ -63,7 +82,7 @@ function addPositionElements(viz, driverId, driverFinalPosition, res) {
 			return true; //todo: cerchio se posizione in classifica parziale invariata
 		})
 		.attr('class','position-circle')
-		.attr('r', CIRCLE_RADIUS)
+		.attr('r', CIRCLES.radius.plain)
 		.style("fill", function(d) {
 			return SCALES.colors(parseInt(driverFinalPosition));
 		});
@@ -74,7 +93,7 @@ function addPositionElements(viz, driverId, driverFinalPosition, res) {
 			return false; //todo: triangle-up se posizione in classifica parziale migliorata
 		})
 		.attr("d", d3.svg.symbol().type("triangle-up").size(function() {
-				return Math.pow(CIRCLE_RADIUS*2,2);
+				return Math.pow(CIRCLES.radius.plain*2,2);
 			})
 		)
 		.attr('class','position-triangle-up')
@@ -88,7 +107,7 @@ function addPositionElements(viz, driverId, driverFinalPosition, res) {
 			return false; //todo: triangle-down se posizione in classifica parziale peggiorata
 		})
 		.attr("d", d3.svg.symbol().type("triangle-down").size(function() {
-				return Math.pow(CIRCLE_RADIUS*2,2);
+				return Math.pow(CIRCLES.radius.plain*2,2);
 			})
 		)
 		.attr('class','position-triangle-down')
@@ -105,46 +124,42 @@ function addPositionElements(viz, driverId, driverFinalPosition, res) {
 			return d.Results[0].position;
 		})
 
-	viz.selectAll("g.position."+driverId+" > .position-circle","g.position."+driverId+" > .position-triangle-up","g.position."+driverId+" > .position-triangle-down")
+	viz.selectAll("g.position."+driverId+" > .position-circle ,g.position."+driverId+" > .position-triangle-up ,g.position."+driverId+" > .position-triangle-down")
 		.attr("stroke", function(d) {
 			//todo: da reimplementare con uno switch
 			if (d.Results[0].status != "Finished") {
 				return "red";
-			} else {
-				return SCALES.colors(parseInt(driverFinalPosition));
-			};
-		})
-		.attr("stroke-width", function(d) {
-			//todo: da reimplementare con uno switch
-			if (d.Results[0].status != "Finished") {
-				return 5;
-			} else {
-				return 0;
-			};
+			}
 		});
 }
 
-function addDriverResultsPolylines(viz) {
-	viz.selectAll('polyline.results')
+function addDriverResultsPath(viz) {
+	viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.plain)
 		.data(drivers)
 		.enter()
-		.append('polyline')
-		.attr('class', 'results')
-		.attr('points', function(d) {
+		.append('path')
+		.attr('class', 'results '+HIGHLIGHT_STATUS_CLASSES.plain)
+		.attr('fill','none')
+		.attr('stroke-width', PATH_STROKE.plain)
+		.attr('d', function(d) {
 			var pts = []
 
 			if (d.results) {
-				pts[0] = DRIVERS_X-125 + ',' + SCALES.y(parseInt(d.position));
-				pts[1] = DRIVERS_X-75 + ',' + SCALES.y(parseInt(d.position));
+				pts[0] = "M"+(DRIVERS_X-125)+ ' ' +(SCALES.y(parseInt(d.position)));
+				pts[1] = "L"+(DRIVERS_X-75) + ' ' + (SCALES.y(parseInt(d.position)));
 				for (var i=0; i< d.results.length; i++) {
 					//console.log("round: "+ d.results[i].round + " - position: " + d.results[i].Results[0].position);
-					pts[i+2] = SCALES.xGPs(d.results[i].round) + ',' + SCALES.y(d.results[i].Results[0].position);
+					pts[i+2] = "S"+ (SCALES.xGPs(d.results[i].round)-65) + ' ' + (SCALES.y(d.results[i].Results[0].position)) + ", " +SCALES.xGPs(d.results[i].round) + ' ' + SCALES.y(d.results[i].Results[0].position);
 				}
 			}
 			return pts.join(' ');
 		})
 		.style('stroke', function(d,i) {
 			return SCALES.colors(parseInt(d.position));
+		})
+		.append("title")
+		.text(function(d) { 
+			return d.name; 
 		})
 }
 
@@ -154,6 +169,7 @@ function addTickLines(viz) {
 		.enter()
 		.append('line')
 		.attr('class','tickline')
+		.style('stroke-width', CIRCLES.radius.plain*2)
 		.attr('x1', function(d) {
 			return SCALES.xGPs(d.round);
 		})
@@ -200,14 +216,24 @@ function addGPLabels(viz) {
 }
 
 function addDriversElements(viz) {
-	viz.selectAll("g.driver-element")
+	viz.selectAll("g.driver-element."+HIGHLIGHT_STATUS_CLASSES.plain)
 		.data(drivers)
 		.enter()
 		.append("g")
 		.attr("transform",function(data) {
 			return "translate("+INSETS.left+","+SCALES.y(parseInt(data.position))+")"
 		})
-		.attr('class','driver-element');
+		.attr('class','driver-element '+HIGHLIGHT_STATUS_CLASSES.plain)
+		.on('click', function(d) {
+			//todo: si può implementare meglio
+			var selectedElem = d3.select(this);
+			if(selectedElem.classed(HIGHLIGHT_STATUS_CLASSES.plain) || selectedElem.classed(HIGHLIGHT_STATUS_CLASSES.dimmed)) {
+				highlight(viz, d.driverId, selectedElem)
+			} else {
+				unhighlight(viz, d.driverId, selectedElem)
+			}
+
+		});
 
 	viz.selectAll("g.driver-element")
 		.data(drivers)
@@ -238,33 +264,75 @@ function confScales() {
 	SCALES.colors = d3.scale.category20();
 }
 
-function getWindowDim() {
-	var w = 630;
-	var h = 460;
-	if (document.body && document.body.offsetWidth) {
+//todo: sicuramente ci sono modi più efficienti di farlo, ma avendo a che fare con pochi elementi (circa 20 piloti, 20 gp, etc...) usare dei cicli e fare diversi selectAll non è un grosso problema e non si perde molto
+function highlight(viz, dId, selectedElem) {
+	//todo: da rivedere e migliorare
 
-		w = document.body.offsetWidth;
-		h = document.body.offsetHeight;
-	}
 
-	if (document.compatMode == 'CSS1Compat' && document.documentElement && document.documentElement.offsetWidth) {
+	//assegna le classi in base alla selezione
+	viz.selectAll('path.results, g.position, g.driver-element')
+		.classed(HIGHLIGHT_STATUS_CLASSES.plain, false)                 // rimuove la classe plain a tutti
+		.classed(HIGHLIGHT_STATUS_CLASSES.dimmed, function(d) {         // dimmed se non è il driver selezionato E non è uno dei driver precedentemente selezionati
+			return !matchingDriverId(d,dId) && !d3.select(this).classed(HIGHLIGHT_STATUS_CLASSES.highlighted)
+		})
+		.classed(HIGHLIGHT_STATUS_CLASSES.highlighted, function(d) {    // highlighted se è il driver selezionato O è uno dei driver precedentemente selezionati
+			return matchingDriverId(d,dId) || d3.select(this).classed(HIGHLIGHT_STATUS_CLASSES.highlighted)
+		});
 
-		w = document.documentElement.offsetWidth;
-		h = document.documentElement.offsetHeight;
-	}
+	//diminuisce lo stroke dei path dei piloti dimmed
+	viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.dimmed)
+		.attr('stroke-width', PATH_STROKE.dimmed);
 
-	if (window.innerWidth && window.innerHeight) {
+	//aumenta lo stroke dei piloti highlighted
+	viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.highlighted)
+		.attr('stroke-width', PATH_STROKE.highlighted);
 
-		w = window.innerWidth;
-		h = window.innerHeight;
-	}
+	//diminuisce il raggio dei position dei piloti dimmed
+	viz.selectAll('g.position.'+HIGHLIGHT_STATUS_CLASSES.dimmed+' circle.position-circle')
+		.attr('r', CIRCLES.radius.dimmed);
 
-	return {'width': w, 'height': h};
+	//aumenta il raggio dei position dei piloti highlighted
+	viz.selectAll('g.position.'+HIGHLIGHT_STATUS_CLASSES.highlighted+' circle.position-circle')
+		.attr('r', CIRCLES.radius.highlighted);
 }
 
-function convertRoundToInt(races) {
-	for (var i=0; i<races.length; i++) {
-		races[i].round = parseInt(races[i].round);
+function unhighlight(viz, dId, selectedElem) {
+	var lastOneSelected = viz.selectAll('g.driver-element.'+HIGHLIGHT_STATUS_CLASSES.highlighted)[0].length == 1 //se c'è almeno un altro pilota selezionato
+
+	if (!lastOneSelected) {
+		//assegna le classi in base alla selezione
+		viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.highlighted+', g.position.'+HIGHLIGHT_STATUS_CLASSES.highlighted+', g.driver-element.'+HIGHLIGHT_STATUS_CLASSES.highlighted)
+			.classed(HIGHLIGHT_STATUS_CLASSES.dimmed, function(d) {         // dimmed se è il driver selezionato
+				return matchingDriverId(d,dId)
+			})
+			.classed(HIGHLIGHT_STATUS_CLASSES.highlighted, function(d) {    // highlighted se non è il driver selezionato
+				return !matchingDriverId(d,dId)
+			});
+
+		//diminuisce lo stroke dei path dei piloti dimmed
+		viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.dimmed)
+			.attr('stroke-width', PATH_STROKE.dimmed);
+
+		//diminuisce il raggio dei position dei piloti dimmed
+		viz.selectAll('g.position.'+HIGHLIGHT_STATUS_CLASSES.dimmed+' circle.position-circle')
+			.attr('r', CIRCLES.radius.dimmed);
+	} else {
+		unhighlightAll(viz)
 	}
-	return races;
+}
+
+function unhighlightAll(viz) {
+	viz.selectAll('path.results, g.position, g.driver-element')     //li prendo tutti per ripristinare lo stato iniziale
+		.classed(HIGHLIGHT_STATUS_CLASSES.highlighted, false)
+		.classed(HIGHLIGHT_STATUS_CLASSES.dimmed, false)
+		.classed(HIGHLIGHT_STATUS_CLASSES.plain, true);
+
+
+	//ripristina gli stroke di tutti i path
+	viz.selectAll('path.results')
+		.attr('stroke-width', PATH_STROKE.plain);
+
+	//diminuisce il raggio dei position dei piloti dimmed
+	viz.selectAll('g.position circle.position-circle')
+		.attr('r', CIRCLES.radius.plain);
 }
