@@ -36,7 +36,16 @@ function matchingDriverId(d, dId) {
 	}
 
 	// per position circles
-	if (d.Results[0].Driver.driverId) {
-		return d.Results[0].Driver.driverId == dId
+	if (d.RoundResult.Driver.driverId) {
+		return d.RoundResult.Driver.driverId == dId
 	}
+}
+
+function getStandingsPosition(round, standings, driverId) {
+	if (standings[round][driverId]) {       //c'è da fare questo controllo perchè in alcuni gp il pilota potrebbe non aver partecipato
+		return standings[round][driverId].positionText;
+	} else {
+		return -1;  //todo: valutare un altro valore
+	}
+
 }

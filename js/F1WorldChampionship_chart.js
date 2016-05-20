@@ -1,7 +1,7 @@
 const WINDOW_DIM = getWindowDim();
-const WIDTH = 2700;
+const WIDTH = 2500;
 //const HEIGHT = WINDOW_DIM.height;
-const HEIGHT = 1500;
+const HEIGHT = 900;
 const SCALES = {};
 const DRIVERS_X = 300;
 const GPS_Y = 20;
@@ -17,16 +17,25 @@ const GP_SHAPE_HEIGHT = 30;
 
 const CIRCLES = {
 	'radius': {
-		"plain": 0,
-		'highlighted':15,
-		'dimmed': 0
+		'plain': 0,
+		'highlighted':12,
+		'dimmed': 0,
+		'mouseover': 16
+	},
+	'stroke': {
+		'plain': 0,
+		'withStatus': 4
 	}
 };
 
+const TRIANGLES = {
+	'area': 600
+}
+
 const PATH_STROKE = {
-	'plain': 7,
-	'highlighted': 15,
-	'dimmed': 3
+	'plain': 8,
+	'highlighted': 12,
+	'dimmed': 2
 };
 
 const HIGHLIGHT_STATUS_CLASSES = {
@@ -37,14 +46,14 @@ const HIGHLIGHT_STATUS_CLASSES = {
 
 var races = [];
 var drivers = [];
-var fixedHighlight = [];
+var standings = [];
 
 window.onload = function() {
-	//todo: per adesso non vengono usate le API e quindi non ci sono chiamate ajax
 	// carica i dati
 	d3.json("./data/F1_MockData.json", function(data) {
 		races = convertRoundToInt(data.races);
 		drivers = data.drivers;
+		standings = data.standings;
 		buildViz();
 	})
 }
@@ -62,59 +71,114 @@ function buildViz() {
 	addDriversElements(viz);
 	addDriverResultsPath(viz);
 	for (var i in drivers) {
-		addPositionElements(viz,drivers[i].driverId,drivers[i].position,drivers[i].results);
+		addPositionElements(viz,drivers[i].driverId,drivers[i].position,drivers[i].Results, standings);
 	}
 
 }
 
-function addPositionElements(viz, driverId, driverFinalPosition, res) {
+function addPositionElements(viz, driverId, driverFinalPosition, res, standings) {
 	viz.selectAll("g.position."+driverId+"."+HIGHLIGHT_STATUS_CLASSES.plain)
 		.data(res)
 		.enter()
 		.append("g")
-		.attr('class','position '+driverId+" "+HIGHLIGHT_STATUS_CLASSES.plain)
+		.attr('class','hidden position '+driverId+" "+HIGHLIGHT_STATUS_CLASSES.plain)
 		.attr('transform',function(d) {
-				return "translate("+SCALES.xGPs(parseInt(d.round))+","+SCALES.y(d.Results[0].position)+")";
+				return "translate("+SCALES.xGPs(parseInt(d.round))+","+SCALES.y(parseInt(d.RoundResult.position))+")";
 		})
+		.on('mouseover', function(d) {
+			d3.select($(this).children('circle.position-circle').get(0)).attr('r', CIRCLES.radius.mouseover)        //un bel magheggio, converto prima i noggetto jquery per prendermi i figli, poi in semplice oggetto dom da passare alla select... jquery magic
+			d3.select($(this).children('path.position-triangle-up').get(0)).attr("d", d3.svg.symbol().type("triangle-up").size(function() {
+					return TRIANGLES.area*2;
+				})
+			)
+			d3.select($(this).children('path.position-triangle-down').get(0)).attr("d", d3.svg.symbol().type("triangle-down").size(function() {
+					return TRIANGLES.area*2;
+				})
+			)
+		})
+		.on('mouseout', function(d) {
+			d3.select($(this).children('circle.position-circle').get(0)).attr('r', CIRCLES.radius.highlighted)
+			d3.select($(this).children('path.position-triangle-up').get(0)).attr("d", d3.svg.symbol().type("triangle-up").size(function() {
+					return TRIANGLES.area;
+				})
+			)
+			d3.select($(this).children('path.position-triangle-down').get(0)).attr("d", d3.svg.symbol().type("triangle-down").size(function() {
+					return TRIANGLES.area;
+				})
+			)
+		});
 
 	viz.selectAll("g.position."+driverId)
 		.append("circle")
 		.filter(function(d) {
-			return true; //todo: cerchio se posizione in classifica parziale invariata
+			if (parseInt(d.round)==1) return true;//se è la prima gara ovviamente non ci sono variazioni
+			var curPos = parseInt(getStandingsPosition(parseInt(d.round)-1, standings, d.RoundResult.Driver.driverId))    //-1 perchè round parte da 1 e non da 0
+			var prevPos = parseInt(getStandingsPosition(parseInt(d.round)-2, standings, d.RoundResult.Driver.driverId))
+			// console.log("----------"+curPos+"   "+prevPos)
+			if (curPos == -1 || prevPos == -1) return true;     // se una delle due posizioni non è definita, non c'è confronto
+
+			if (curPos == prevPos) {
+				return true;
+			} else {
+				return false;
+			}
 		})
 		.attr('class','position-circle')
 		.attr('r', CIRCLES.radius.plain)
+		.attr('stroke-width', CIRCLES.stroke.plain)
 		.style("fill", function(d) {
-			return SCALES.colors(parseInt(driverFinalPosition));
-		});
+			return d3.rgb(SCALES.colors(parseInt(driverFinalPosition))).darker();
+		})
 
 	viz.selectAll("g.position."+driverId)
 		.append("path")
 		.filter(function(d) {
-			return false; //todo: triangle-up se posizione in classifica parziale migliorata
+			if (parseInt(d.round)==1) return false;
+			var curPos = parseInt(getStandingsPosition(parseInt(d.round)-1, standings, d.RoundResult.Driver.driverId))    //-1 perchè round parte da 1 e non da 0
+			var prevPos = parseInt(getStandingsPosition(parseInt(d.round)-2, standings, d.RoundResult.Driver.driverId))
+
+			if (curPos == -1 || prevPos == -1) return false;
+
+			if (curPos < prevPos) {
+				return true;
+			} else {
+				return false;
+			}
 		})
 		.attr("d", d3.svg.symbol().type("triangle-up").size(function() {
-				return Math.pow(CIRCLES.radius.plain*2,2);
+				return TRIANGLES.area;
 			})
 		)
 		.attr('class','position-triangle-up')
 		.style("fill", function(d) {
-			return SCALES.colors(parseInt(driverFinalPosition));
-		});
+			return d3.rgb(SCALES.colors(parseInt(driverFinalPosition))).darker();
+		})
+		.attr('transform',"translate(0,-5)");   //todo: fix provvisorio
 
 	viz.selectAll("g.position."+driverId)
 		.append("path")
 		.filter(function(d) {
-			return false; //todo: triangle-down se posizione in classifica parziale peggiorata
+			if (parseInt(d.round)==1) return false;
+			var curPos = parseInt(getStandingsPosition(parseInt(d.round)-1, standings, d.RoundResult.Driver.driverId))    //-1 perchè round parte da 1 e non da 0
+			var prevPos = parseInt(getStandingsPosition(parseInt(d.round)-2, standings, d.RoundResult.Driver.driverId))
+
+			if (curPos == -1 || prevPos == -1) return false;
+
+			if (curPos > prevPos) {
+				return true;
+			} else {
+				return false;
+			}
 		})
 		.attr("d", d3.svg.symbol().type("triangle-down").size(function() {
-				return Math.pow(CIRCLES.radius.plain*2,2);
+				return TRIANGLES.area;
 			})
 		)
 		.attr('class','position-triangle-down')
 		.style("fill", function(d) {
-			return SCALES.colors(parseInt(driverFinalPosition));
-		});
+			return d3.rgb(SCALES.colors(parseInt(driverFinalPosition))).darker();
+		})
+		.attr('transform',"translate(0,5)");   //todo: fix provvisorio
 
 	viz.selectAll("g.position."+driverId)
 		.append('text')
@@ -122,16 +186,22 @@ function addPositionElements(viz, driverId, driverFinalPosition, res) {
 		.attr('text-anchor', 'middle')
 		.attr('dominant-baseline', 'central')
 		.text(function(d) {
-			return d.Results[0].position;
-		})
+			return d.RoundResult.position;
+		});
+
 
 	viz.selectAll("g.position."+driverId+" > .position-circle ,g.position."+driverId+" > .position-triangle-up ,g.position."+driverId+" > .position-triangle-down")
+		.filter(function(d) {
+			return d.RoundResult.status != "Finished";
+		})
 		.attr("stroke", function(d) {
-			//todo: da reimplementare con uno switch
-			if (d.Results[0].status != "Finished") {
 				return "red";
-			}
-		});
+		})
+		.attr("stroke-width", function(d) {
+				return CIRCLES.stroke.withStatus;
+		})
+		// .attr("stroke-dasharray","5,2");
+
 }
 
 function addDriverResultsPath(viz) {
@@ -142,38 +212,48 @@ function addDriverResultsPath(viz) {
 		.attr('class', 'results '+HIGHLIGHT_STATUS_CLASSES.plain)
 		.attr('fill','none')
 		.attr('stroke-width', PATH_STROKE.plain)
+		.attr('stroke-linecap', 'round')
 		.attr('d', function(d) {
 			var pts = []
 
-			if (d.results) {
+			if (d.Results) {
 				pts[0] = "M"+(DRIVERS_X-125)+ ' ' +(SCALES.y(parseInt(d.position)));
 				pts[1] = "L"+(DRIVERS_X-75) + ' ' + (SCALES.y(parseInt(d.position))); //todo: aggiungere curva bezier
-				for (var i=0; i< d.results.length; i++) {
-					//console.log("round: "+ d.results[i].round + " - position: " + d.results[i].Results[0].position);
-					pts[i+2] = "S"+ (SCALES.xGPs(d.results[i].round)-65) + ' ' + (SCALES.y(d.results[i].Results[0].position)) + ", " +SCALES.xGPs(d.results[i].round) + ' ' + SCALES.y(d.results[i].Results[0].position);
+				for (var i=0; i< d.Results.length; i++) {
+					// console.log("round: "+ d.Results[i].round + " - position: " + d.Results[i].RoundResult.position);
+					pts[i+2] = "S"+ (SCALES.xGPs(parseInt(d.Results[i].round))-65) + ' ' + (SCALES.y(parseInt(d.Results[i].RoundResult.position))) + ", " +SCALES.xGPs(parseInt(d.Results[i].round)) + ' ' + SCALES.y(parseInt(d.Results[i].RoundResult.position));
 				}
 			}
 			return pts.join(' ');
 		})
+		.on('click', function(d) {
+			//todo: si può implementare meglio
+			var selectedElem = d3.select(this);
+			if(selectedElem.classed(HIGHLIGHT_STATUS_CLASSES.plain) || selectedElem.classed(HIGHLIGHT_STATUS_CLASSES.dimmed)) {
+				highlight(viz, d.driverId, selectedElem);
+			} else {
+				unhighlight(viz, d.driverId, selectedElem);
+			}
+		})
 		.style('stroke', function(d,i) {
 			return SCALES.colors(parseInt(d.position));
 		})
-		.on('mouseover', function(d) {
-			if (!fixedHighlight.indexOf(d.driverId) > -1) {
-				var selectedElem = d3.select(this);
-				highlight(viz, d.driverId, selectedElem);
-			}
-		})
-		.on('mouseout', function(d) {
-			if (!fixedHighlight.indexOf(d.driverId) > -1) {
-				var selectedElem = d3.select(this);
-				unhighlight(viz, d.driverId, selectedElem);
-			}
-
-		})
+		// .on('mouseover', function(d) {
+		// 	if (!fixedHighlight.indexOf(d.driverId) > -1) {
+		// 		var selectedElem = d3.select(this);
+		// 		highlight(viz, d.driverId, selectedElem);
+		// 	}
+		// })
+		// .on('mouseout', function(d) {
+		// 	if (!fixedHighlight.indexOf(d.driverId) > -1) {
+		// 		var selectedElem = d3.select(this);
+		// 		unhighlight(viz, d.driverId, selectedElem);
+		// 	}
+		//
+		// })
 		.append("title")
 		.text(function(d) { 
-			return d.name; 
+			return d.familyName;
 		})
 }
 
@@ -183,7 +263,7 @@ function addTickLines(viz) {
 		.enter()
 		.append('line')
 		.attr('class','tickline')
-		.style('stroke-width', 20)
+		.style('stroke-width', CIRCLES.radius.highlighted*2)
 		.attr('x1', function(d) {
 			return SCALES.xGPs(d.round);
 		})
@@ -243,10 +323,8 @@ function addDriversElements(viz) {
 			var selectedElem = d3.select(this);
 			if(selectedElem.classed(HIGHLIGHT_STATUS_CLASSES.plain) || selectedElem.classed(HIGHLIGHT_STATUS_CLASSES.dimmed)) {
 				highlight(viz, d.driverId, selectedElem);
-				fixedHighlight.push(d.driverId);
 			} else {
 				unhighlight(viz, d.driverId, selectedElem);
-				fixedHighlight.splice(fixedHighlight.indexOf(d.driverId), 1);
 			}
 		});
 
@@ -273,10 +351,10 @@ function confScales() {
 
 	SCALES.y = d3.scale.linear()
 		//todo: aggiungere limite superiore del dominio
-		.domain([1, 21]) //il dominio parte da 1 e non da 0 cos� possiamo utilizzare direttamente le posizioni della classifica finale (che partono da 1 ovviamente)
+		.domain([1, 21]) //il dominio parte da 1 e non da 0 così possiamo utilizzare direttamente le posizioni della classifica finale (che partono da 1 ovviamente)
 		.range([INSETS.top, HEIGHT - INSETS.bottom]); //todo: da migliorare
 
-	SCALES.colors = d3.scale.category20();
+	SCALES.colors = d3.scale.linear().domain([1,(drivers.length-1)/2,drivers.length-1]).range(['#009933','#FFFFFF', '#ff3333']).interpolate(d3.interpolateRgb);
 }
 
 //todo: sicuramente ci sono modi più efficienti di farlo, ma avendo a che fare con pochi elementi (circa 20 piloti, 20 gp, etc...) usare dei cicli e fare diversi selectAll non è un grosso problema e non si perde molto
@@ -285,7 +363,7 @@ function highlight(viz, dId, selectedElem) {
 
 
 	//assegna le classi in base alla selezione
-	viz.selectAll('path.results, g.position, g.driver-element')
+	viz.selectAll('path.results, g.position, g.driver-element, .position-text')
 		.classed(HIGHLIGHT_STATUS_CLASSES.plain, false)                 // rimuove la classe plain a tutti
 		.classed(HIGHLIGHT_STATUS_CLASSES.dimmed, function(d) {         // dimmed se non è il driver selezionato E non è uno dei driver precedentemente selezionati
 			return !matchingDriverId(d,dId) && !d3.select(this).classed(HIGHLIGHT_STATUS_CLASSES.highlighted)
@@ -309,6 +387,12 @@ function highlight(viz, dId, selectedElem) {
 	//aumenta il raggio dei position dei piloti highlighted
 	viz.selectAll('g.position.'+HIGHLIGHT_STATUS_CLASSES.highlighted+' circle.position-circle')
 		.attr('r', CIRCLES.radius.highlighted);
+
+	//mostra le posizioni
+	viz.selectAll('g.position')
+		.classed('hidden', function(d) {    // testo del position visibile se il driver è selezionato O è uno dei driver precedentemente selezionati
+			return !d3.select(this).classed(HIGHLIGHT_STATUS_CLASSES.highlighted)   //hidden è da togliere se il pilota è selezionato
+		});
 }
 
 function unhighlight(viz, dId, selectedElem) {
@@ -316,7 +400,7 @@ function unhighlight(viz, dId, selectedElem) {
 
 	if (!lastOneSelected) {
 		//assegna le classi in base alla selezione
-		viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.highlighted+', g.position.'+HIGHLIGHT_STATUS_CLASSES.highlighted+', g.driver-element.'+HIGHLIGHT_STATUS_CLASSES.highlighted)
+		viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.highlighted+', g.position.'+HIGHLIGHT_STATUS_CLASSES.highlighted+', g.driver-element.'+HIGHLIGHT_STATUS_CLASSES.highlighted+', .position-text.'+HIGHLIGHT_STATUS_CLASSES.highlighted)
 			.classed(HIGHLIGHT_STATUS_CLASSES.dimmed, function(d) {         // dimmed se è il driver selezionato
 				return matchingDriverId(d,dId)
 			})
@@ -331,13 +415,19 @@ function unhighlight(viz, dId, selectedElem) {
 		//diminuisce il raggio dei position dei piloti dimmed
 		viz.selectAll('g.position.'+HIGHLIGHT_STATUS_CLASSES.dimmed+' circle.position-circle')
 			.attr('r', CIRCLES.radius.dimmed);
+
+		//nasconde i position
+		viz.selectAll('g.position.'+HIGHLIGHT_STATUS_CLASSES.dimmed)
+			.classed('hidden', true);
+
+
 	} else {
 		unhighlightAll(viz)
 	}
 }
 
 function unhighlightAll(viz) {
-	viz.selectAll('path.results, g.position, g.driver-element')     //li prendo tutti per ripristinare lo stato iniziale
+	viz.selectAll('path.results, g.position, g.driver-element, .position-text')     //li prendo tutti per ripristinare lo stato iniziale
 		.classed(HIGHLIGHT_STATUS_CLASSES.highlighted, false)
 		.classed(HIGHLIGHT_STATUS_CLASSES.dimmed, false)
 		.classed(HIGHLIGHT_STATUS_CLASSES.plain, true);
@@ -347,7 +437,11 @@ function unhighlightAll(viz) {
 	viz.selectAll('path.results')
 		.attr('stroke-width', PATH_STROKE.plain);
 
-	//diminuisce il raggio dei position dei piloti dimmed
+	//diminuisce il raggio dei position dei piloti
 	viz.selectAll('g.position circle.position-circle')
 		.attr('r', CIRCLES.radius.plain);
+
+	//nasconde i position
+	viz.selectAll('g.position')
+		.classed('hidden', true);
 }
