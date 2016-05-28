@@ -1,6 +1,6 @@
 const WINDOW_DIM = getWindowDim();
 const WIDTH_WINDOW = WINDOW_DIM.width;
-const HEIGHT_WINDOW = WINDOW_DIM.height-80;
+const HEIGHT_WINDOW = WINDOW_DIM.height-60;
 const WIDTH = 2300;
 const HEIGHT = 1200;
 const SCALES = {};
