@@ -47,6 +47,7 @@ path.results{
 g > .position-text {
     fill: #323639;
     font-weight: bold;
+    font-size: 15px;
 }
 
 .driver-path-elem {
@@ -121,17 +122,31 @@ g.gp-element:hover {
 
 #driversStandingRect {
     fill: white;
-    fill-opacity:0.05;
+    fill-opacity:0.0;
+    stroke: #3b4044;
+    stroke-width: 3px;
 }
 
 footer {
     background-color: #323639;
     color: #656E75;
-    font-size: 8px;
+    font-size: small;
 }
 
 footer span {
     float:right
 }
+
+g.info-g text {
+    font-family: Serif;
+    font-size: 22px;
+    fill: #323639;
+    font-weight: 900;
+}
+
+g.info-g:hover {
+    cursor: pointer;
+}
+
 
 

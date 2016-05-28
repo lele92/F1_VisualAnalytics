@@ -9,18 +9,18 @@ const INSETS = {
 	'top': 75,
 	'right': 0,
 	'bottom': 50,
-	'left': 10
+	'left': 20
 }
 
 const GP_SHAPE_WIDTH = 100;
 const GP_SHAPE_HEIGHT = 30;
 
-const CIRCLES = {
+const POSITION_CIRCLES = {
 	'radius': {
 		'plain': 0,
-		'highlighted':12,
+		'highlighted':15,
 		'dimmed': 0,
-		'mouseover': 16
+		'mouseover': 22
 	},
 	'stroke': {
 		'plain': 0,
@@ -56,6 +56,38 @@ const HIGHLIGHT_STATUS_CLASSES = {
 };
 
 const DRIVERS_X = 250;
+
+const STATUSES = {
+	'accident': [
+		'Accident',
+		'Collision',
+		'Spun off'
+	],
+	'failure': [
+		'Engine',
+		'Gearbox',
+		'Transmission',
+		'Electrical',
+		'Spun off',
+		'Suspension',
+		'Brakes',
+		'Tyre',
+		'Retired',
+		'Front wing',
+		'Wheel',
+		'Throttle',
+		'Oil leak',
+		'Withdrew',
+		'Fuel system',
+		'Power loss',
+		'Excluded',
+		'Turbo',
+		'Collision damage',
+		'Power Unit',
+		'ERS',
+		'Brake duct'
+	]
+}
 
 var races = [];
 var drivers = [];
@@ -100,8 +132,8 @@ function addDriversStandingsRect(viz) {
 	viz.append('rect')
 		.attr('id','driversStandingRect')
 		.attr('height',HEIGHT-10)
-		.attr('width',200)
-		.attr('x','-5')
+		.attr('width',185)
+		.attr('x','5')
 		.attr('y','3')
 		.attr('ry','10')
 		.attr('rx','10');
@@ -125,19 +157,21 @@ function addPositionElements(viz, driverId, driverFinalPosition, res, standings)
 		.attr('transform',function(d) {
 				return "translate("+SCALES.xGPs(parseInt(d.round))+","+SCALES.y(parseInt(d.RoundResult.position))+")";
 		})
-		.on('mouseover', function(d) {
-			d3.select($(this).children('circle.position-circle').get(0)).attr('r', CIRCLES.radius.mouseover)        //un bel magheggio, converto prima i noggetto jquery per prendermi i figli, poi in semplice oggetto dom da passare alla select... jquery magic
+		.on('mouseenter', function(d) {
+			d3.select($(this).children('circle.position-circle').get(0)).attr('r', POSITION_CIRCLES.radius.mouseover)        //un bel magheggio, converto prima i noggetto jquery per prendermi i figli, poi in semplice oggetto dom da passare alla select... jquery magic
+			d3.select($(this).children('text.position-text').get(0)).style('font-size','x-large')
 			d3.select($(this).children('path.position-triangle-up').get(0)).attr("d", d3.svg.symbol().type("triangle-up").size(function() {
-					return TRIANGLES.area*2;
+					return TRIANGLES.area*3;
 				})
 			)
 			d3.select($(this).children('path.position-triangle-down').get(0)).attr("d", d3.svg.symbol().type("triangle-down").size(function() {
-					return TRIANGLES.area*2;
+					return TRIANGLES.area*3;
 				})
 			)
 		})
-		.on('mouseout', function(d) {
-			d3.select($(this).children('circle.position-circle').get(0)).attr('r', CIRCLES.radius.highlighted)
+		.on('mouseleave', function(d) {
+			d3.select($(this).children('circle.position-circle').get(0)).attr('r', POSITION_CIRCLES.radius.highlighted)
+			d3.select($(this).children('text.position-text').get(0)).style('font-size','15px')
 			d3.select($(this).children('path.position-triangle-up').get(0)).attr("d", d3.svg.symbol().type("triangle-up").size(function() {
 					return TRIANGLES.area;
 				})
@@ -164,8 +198,8 @@ function addPositionElements(viz, driverId, driverFinalPosition, res, standings)
 			}
 		})
 		.attr('class','position-circle')
-		.attr('r', CIRCLES.radius.plain)
-		.attr('stroke-width', CIRCLES.stroke.plain)
+		.attr('r', POSITION_CIRCLES.radius.plain)
+		.attr('stroke-width', POSITION_CIRCLES.stroke.plain)
 		.style("fill", function(d) {
 			return d3.rgb(SCALES.colors(parseInt(driverFinalPosition))).darker();
 		})
@@ -236,14 +270,11 @@ function addPositionElements(viz, driverId, driverFinalPosition, res, standings)
 			return d.RoundResult.status != "Finished";
 		})
 		.attr("stroke", function(d) {
-			switch (d.RoundResult.status) {
-				case 'Accident': return 'yellow';
-				case 'Collision': return 'yellow';
-				// case
-			}
+			if (STATUSES.accident.indexOf(d.RoundResult.status) != -1) return 'red'
+			if (STATUSES.failure.indexOf(d.RoundResult.status) != -1) return 'yellow'
 		})
 		.attr("stroke-width", function(d) {
-				return CIRCLES.stroke.withStatus;
+				return POSITION_CIRCLES.stroke.withStatus;
 		})
 		// .attr("stroke-dasharray","5,2");
 
@@ -261,8 +292,8 @@ function addDriverResultsPath(viz) {
 		.attr('d', function(d) {
 			var pts = [];
 			if (d.Results) {
-				pts[0] = "M"+(DRIVERS_X-110)+ ' ' +(SCALES.y(parseInt(d.position)));
-				pts[1] = "L"+(DRIVERS_X-70) + ' ' + (SCALES.y(parseInt(d.position))); //todo: aggiungere curva bezier
+				pts[0] = "M"+(DRIVERS_X-82)+ ' ' +(SCALES.y(parseInt(d.position)));
+				pts[1] = "L"+(DRIVERS_X-60) + ' ' + (SCALES.y(parseInt(d.position))); //todo: aggiungere curva bezier
 				// pts[2] = "S"+ (DRIVERS_X-90) + ' ' + (SCALES.y(parseInt(d.position))) + ", " +(DRIVERS_X-60) + ' ' + (SCALES.y(parseInt(d.position))); //todo: aggiungere curva bezier
 				for (var i=0; i< d.Results.length; i++) {
 					// console.log("round: "+ d.Results[i].round + " - position: " + d.Results[i].RoundResult.position);
@@ -295,7 +326,7 @@ function addTickLines(viz) {
 		.enter()
 		.append('line')
 		.attr('class','tickline')
-		.style('stroke-width', CIRCLES.radius.highlighted*2)
+		.style('stroke-width', POSITION_CIRCLES.radius.highlighted*2)
 		.attr('x1', function(d) {
 			return SCALES.xGPs(d.round);
 		})
@@ -316,7 +347,7 @@ function addLightTickLines(viz) {
 		.enter()
 		.append('line')
 		.attr('class','tickline-light')
-		.style('stroke-width', CIRCLES.radius.highlighted*2)
+		.style('stroke-width', POSITION_CIRCLES.radius.highlighted*2)
 		.attr('x1', function(d) {
 			return SCALES.xGPs(d.round);
 		})
@@ -341,12 +372,10 @@ function addGPElements(viz) {
 			return "translate("+SCALES.xGPs(d.round)+","+GPS_Y+")";
 		})
 		.on('mouseenter', function() {
-			console.log(d3.selectAll("rect.gp-rect").attr("fill"));
 			d3.select($(this).children('rect.gp-rect').get(0))
 				.attr('fill', d3.rgb(d3.selectAll("rect.gp-rect").attr("fill")).darker());
 		})
 		.on('mouseleave', function() {
-			console.log(d3.selectAll("rect.gp-rect").attr("fill"));
 			d3.select($(this).children('rect.gp-rect').get(0))
 				.attr('fill', '#D62316');
 		});
@@ -414,7 +443,41 @@ function addDriversElements(viz) {
 			} else {
 				unhighlight(viz, d.driverId, selectedElem);
 			}
+		})
+
+	viz.selectAll("g.info-g")
+		.data(drivers)
+		.enter()
+		.append('g')
+		.attr('class','info-g')
+		.attr("transform",function(data) {
+			return "translate("+INSETS.left+","+SCALES.y(parseInt(data.position))+")"
+		})
+		.on('mouseenter', function() {
+			console.log($(this).children('circle.info-circle').get(0))
+			d3.select($(this).children('circle.info-circle').get(0))
+				.attr('fill', 'white');
+		})
+		.on('mouseleave', function() {
+			d3.select($(this).children('circle.info-circle').get(0))
+				.attr('fill', '#656E75');
 		});
+
+	viz.selectAll("g.info-g")
+		.data(drivers)
+		.append('circle')
+		.attr('class','info-circle')
+		.attr('fill', '#656E75')
+		.attr('r', '10');
+
+
+	viz.selectAll("g.info-g")
+		.data(drivers)
+		.append('text')
+		.attr('class','driver-final-position')
+		.attr('text-anchor', 'middle')
+		.attr('dominant-baseline', 'central')
+		.text('i');
 
 	viz.selectAll("g.driver-element")
 		.data(drivers)
@@ -423,7 +486,7 @@ function addDriversElements(viz) {
 		.attr("rx","0")
 		.attr("ry","15")
 		// .attr("y","0")
-		// .attr("x","0")
+		.attr("x","18")
 		.attr("height", DRIVER_RECT.rectHeight)
 		.attr("width", DRIVER_RECT.rectWidth)
 		.style('fill', function(d){
@@ -435,7 +498,7 @@ function addDriversElements(viz) {
 		.append('text')
 		.attr('class','driver-label')
 		.attr('y', DRIVER_RECT.rectHeight/2)
-		.attr('x', '35')
+		.attr('x', '55')
 		.text(function(data) {
 			return data.familyName;
 		})
@@ -445,7 +508,7 @@ function addDriversElements(viz) {
 		.append("g")                                //questi <g> servono per rendere possibile centrare le posizioni finali nei cerchi
 		.attr('class','final-position-g')
 		.attr("transform",function(data) {
-			return "translate(15,"+DRIVER_RECT.rectHeight/2+")"
+			return "translate(35,"+DRIVER_RECT.rectHeight/2+")"
 		});
 
 	viz.selectAll("g.final-position-g")
@@ -510,11 +573,11 @@ function highlight(viz, dId, selectedElem) {
 
 	// //diminuisce il raggio dei position dei piloti dimmed
 	// viz.selectAll('g.position.'+HIGHLIGHT_STATUS_CLASSES.dimmed+' circle.position-circle')
-	// 	.attr('r', CIRCLES.radius.dimmed)
+	// 	.attr('r', POSITION_CIRCLES.radius.dimmed)
 
 	//aumenta il raggio dei position dei piloti highlighted
 	viz.selectAll('g.position.'+HIGHLIGHT_STATUS_CLASSES.highlighted+' circle.position-circle')
-		.attr('r', CIRCLES.radius.highlighted);
+		.attr('r', POSITION_CIRCLES.radius.highlighted);
 
 	//cambia i colori
 	for (var i in drivers) {
@@ -569,7 +632,7 @@ function unhighlight(viz, dId, selectedElem) {
 
 		//diminuisce il raggio dei position dei piloti dimmed e cambia colore
 		viz.selectAll('g.position.'+HIGHLIGHT_STATUS_CLASSES.dimmed+' circle.position-circle')
-			.attr('r', CIRCLES.radius.dimmed)
+			.attr('r', POSITION_CIRCLES.radius.dimmed)
 			.style('fill', function(d) {
 				SCALES.colors(parseInt(standings[standings.length -1][d.RoundResult.Driver.driverId].positionText));
 			});
@@ -606,7 +669,7 @@ function unhighlightAll(viz) {
 
 	//diminuisce il raggio dei position dei piloti e cambia colore
 	viz.selectAll('g.position circle.position-circle')
-		.attr('r', CIRCLES.radius.plain)
+		.attr('r', POSITION_CIRCLES.radius.plain)
 		.style('fill', function(d) {
 			SCALES.colors(parseInt(standings[standings.length -1][d.RoundResult.Driver.driverId].positionText));
 		});
@@ -633,7 +696,7 @@ function addDriversHeaderElements(viz) {
 	viz.append('g')
 		.attr('id','driversHeader')
 		.attr('transform',function(d) {
-			return "translate(0,6)";
+			return "translate(12,6)";
 		})
 
 	viz.select('#driversHeader')
