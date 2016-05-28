@@ -1,9 +1,21 @@
+@font-face {
+    font-family: "f1Font";
+    font-weight: bold;
+    src: url('\other\myFont.otf') format('opentype');
+}
+
 #chart > svg{
     background-color: #323639;
 }
 
 line.tickline {
     stroke: #3b4044;
+}
+
+line.tickline-light {
+    stroke: #4D5459;
+    /*stroke-linecap:round;*/
+    /*stroke-linejoin:round;*/
 }
 
 text.gp-label {
@@ -14,19 +26,17 @@ text.gp-label {
 
 rect.gp-rect {
     opacity:1;
-    fill:#B22D2D;
-    fill-opacity:1;
-    stroke: #9F2828;
-    stroke-width: 3;
-    stroke-linecap:round;
-    stroke-linejoin:round;
-    stroke-miterlimit:4;
-    stroke-dasharray:none;
-    stroke-opacity:1
 }
 
 text.driver-label {
     dominant-baseline: middle;
+    fill: #323639;
+    font-family: sans-serif;
+    font-weight: bold;
+}
+
+.driver-rect {
+
 }
 
 path.results{
@@ -35,7 +45,8 @@ path.results{
 }
 
 g > .position-text {
-    fill: white;
+    fill: #323639;
+    font-weight: bold;
 }
 
 .driver-path-elem {
@@ -69,4 +80,58 @@ g.driver-element:hover{
 g.position:hover {
     cursor: pointer;
 }
+
+.final-position-circle {
+    fill: #323639
+}
+
+text.driver-final-position {
+    /*dominant-baseline: central;*/
+}
+
+#imgTitle {
+    display: block;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    padding-left: 10px;
+}
+
+#vizContainer {
+    background-color: #323639;
+}
+
+#topLine {
+    stroke: #3b4044;
+    stroke-width:10;
+}
+
+#titleContainer {
+    background-color: #323639;
+    border-bottom: 5px solid #3b4044;
+    display: block;
+}
+
+g.gp-element:hover {
+    cursor: pointer;
+}
+
+#titleContainer {
+    /*width: 2500px;*/
+}
+
+#driversStandingRect {
+    fill: white;
+    fill-opacity:0.05;
+}
+
+footer {
+    background-color: #323639;
+    color: #656E75;
+    font-size: 8px;
+}
+
+footer span {
+    float:right
+}
+
 

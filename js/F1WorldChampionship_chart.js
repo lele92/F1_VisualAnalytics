@@ -1,15 +1,15 @@
 const WINDOW_DIM = getWindowDim();
-const WIDTH = 2500;
-//const HEIGHT = WINDOW_DIM.height;
-const HEIGHT = 900;
+const WIDTH_WINDOW = WINDOW_DIM.width;
+const HEIGHT_WINDOW = WINDOW_DIM.height-80;
+const WIDTH = 2300;
+const HEIGHT = 1200;
 const SCALES = {};
-const DRIVERS_X = 300;
-const GPS_Y = 20;
+const GPS_Y = 0;
 const INSETS = {
 	'top': 75,
 	'right': 0,
 	'bottom': 50,
-	'left': 50
+	'left': 10
 }
 
 const GP_SHAPE_WIDTH = 100;
@@ -24,12 +24,23 @@ const CIRCLES = {
 	},
 	'stroke': {
 		'plain': 0,
-		'withStatus': 4
+		'withStatus': 5
 	}
 };
 
 const TRIANGLES = {
 	'area': 600
+}
+
+const DRIVER_RECT = {
+	'rectHeight': 30,
+	'rectWidth': 130
+}
+
+const GP_PATH = {
+	'rectHeight': 25,
+	'rectWidth': 120,
+	'delta':20
 }
 
 const PATH_STROKE = {
@@ -40,9 +51,11 @@ const PATH_STROKE = {
 
 const HIGHLIGHT_STATUS_CLASSES = {
 	'plain': 'plain-elem',
-	'highlighted': 	'highlighted-elem',
+	'highlighted': 'highlighted-elem',
 	'dimmed': 'dimmed-elem'
 };
+
+const DRIVERS_X = 250;
 
 var races = [];
 var drivers = [];
@@ -50,7 +63,7 @@ var standings = [];
 
 window.onload = function() {
 	// carica i dati
-	d3.json("./data/F1_MockData.json", function(data) {
+	d3.json("./data/F1_data.json", function(data) {
 		races = convertRoundToInt(data.races);
 		drivers = data.drivers;
 		standings = data.standings;
@@ -63,17 +76,44 @@ function buildViz() {
 
 	var viz = d3.select("#chart")
 		.append("svg")
-		.attr('width',WIDTH)
-		.attr('height',HEIGHT)
+		.attr('width',WIDTH_WINDOW)
+		.attr('height',HEIGHT_WINDOW)
+		.attr('viewBox', '0 0 '+WIDTH+' '+HEIGHT)
+		// .attr('preserveAspectRatio','none')
 
+	// addTopLine(viz)
+	addDriversStandingsRect(viz);
 	addTickLines(viz);
-	addGPLabels(viz);
-	addDriversElements(viz);
+	addLightTickLines(viz);
+	//todo: aggiungere qui tick colorati (per +1, +2, etc..)
+	addGPElements(viz);
 	addDriverResultsPath(viz);
+	addDriversElements(viz);
 	for (var i in drivers) {
 		addPositionElements(viz,drivers[i].driverId,drivers[i].position,drivers[i].Results, standings);
 	}
+	addDriversHeaderElements(viz);
 
+}
+
+function addDriversStandingsRect(viz) {
+	viz.append('rect')
+		.attr('id','driversStandingRect')
+		.attr('height',HEIGHT-10)
+		.attr('width',200)
+		.attr('x','-5')
+		.attr('y','3')
+		.attr('ry','10')
+		.attr('rx','10');
+}
+
+function addTopLine(viz) {
+	viz.append('line')
+		.attr('id','topLine')
+		.attr('x1',0)
+		.attr('y1',0)
+		.attr('x2',WIDTH)
+		.attr('y2',0);
 }
 
 function addPositionElements(viz, driverId, driverFinalPosition, res, standings) {
@@ -192,10 +232,15 @@ function addPositionElements(viz, driverId, driverFinalPosition, res, standings)
 
 	viz.selectAll("g.position."+driverId+" > .position-circle ,g.position."+driverId+" > .position-triangle-up ,g.position."+driverId+" > .position-triangle-down")
 		.filter(function(d) {
+			// console.log(d.RoundResult.status)
 			return d.RoundResult.status != "Finished";
 		})
 		.attr("stroke", function(d) {
-				return "red";
+			switch (d.RoundResult.status) {
+				case 'Accident': return 'yellow';
+				case 'Collision': return 'yellow';
+				// case
+			}
 		})
 		.attr("stroke-width", function(d) {
 				return CIRCLES.stroke.withStatus;
@@ -214,14 +259,14 @@ function addDriverResultsPath(viz) {
 		.attr('stroke-width', PATH_STROKE.plain)
 		.attr('stroke-linecap', 'round')
 		.attr('d', function(d) {
-			var pts = []
-
+			var pts = [];
 			if (d.Results) {
-				pts[0] = "M"+(DRIVERS_X-125)+ ' ' +(SCALES.y(parseInt(d.position)));
-				pts[1] = "L"+(DRIVERS_X-75) + ' ' + (SCALES.y(parseInt(d.position))); //todo: aggiungere curva bezier
+				pts[0] = "M"+(DRIVERS_X-110)+ ' ' +(SCALES.y(parseInt(d.position)));
+				pts[1] = "L"+(DRIVERS_X-70) + ' ' + (SCALES.y(parseInt(d.position))); //todo: aggiungere curva bezier
+				// pts[2] = "S"+ (DRIVERS_X-90) + ' ' + (SCALES.y(parseInt(d.position))) + ", " +(DRIVERS_X-60) + ' ' + (SCALES.y(parseInt(d.position))); //todo: aggiungere curva bezier
 				for (var i=0; i< d.Results.length; i++) {
 					// console.log("round: "+ d.Results[i].round + " - position: " + d.Results[i].RoundResult.position);
-					pts[i+2] = "S"+ (SCALES.xGPs(parseInt(d.Results[i].round))-65) + ' ' + (SCALES.y(parseInt(d.Results[i].RoundResult.position))) + ", " +SCALES.xGPs(parseInt(d.Results[i].round)) + ' ' + SCALES.y(parseInt(d.Results[i].RoundResult.position));
+					pts[i+2] = "S"+ (SCALES.xGPs(parseInt(d.Results[i].round))-60) + ' ' + (SCALES.y(parseInt(d.Results[i].RoundResult.position))) + ", " +SCALES.xGPs(parseInt(d.Results[i].round)) + ' ' + SCALES.y(parseInt(d.Results[i].RoundResult.position));
 				}
 			}
 			return pts.join(' ');
@@ -238,19 +283,6 @@ function addDriverResultsPath(viz) {
 		.style('stroke', function(d,i) {
 			return SCALES.colors(parseInt(d.position));
 		})
-		// .on('mouseover', function(d) {
-		// 	if (!fixedHighlight.indexOf(d.driverId) > -1) {
-		// 		var selectedElem = d3.select(this);
-		// 		highlight(viz, d.driverId, selectedElem);
-		// 	}
-		// })
-		// .on('mouseout', function(d) {
-		// 	if (!fixedHighlight.indexOf(d.driverId) > -1) {
-		// 		var selectedElem = d3.select(this);
-		// 		unhighlight(viz, d.driverId, selectedElem);
-		// 	}
-		//
-		// })
 		.append("title")
 		.text(function(d) { 
 			return d.familyName;
@@ -278,7 +310,28 @@ function addTickLines(viz) {
 		})
 }
 
-function addGPLabels(viz) {
+function addLightTickLines(viz) {
+	viz.selectAll('line.tickline-light')
+		.data(races)
+		.enter()
+		.append('line')
+		.attr('class','tickline-light')
+		.style('stroke-width', CIRCLES.radius.highlighted*2)
+		.attr('x1', function(d) {
+			return SCALES.xGPs(d.round);
+		})
+		.attr('y1', function(d) {
+			return 0;
+		})
+		.attr('x2', function(d) {
+			return SCALES.xGPs(d.round);
+		})
+		.attr('y2', function(d) {
+			return SCALES.y(d.lastFinished+0.5);
+		})
+}
+
+function addGPElements(viz) {
 	viz.selectAll("g.gp-element")
 		.data(races)
 		.enter()
@@ -286,7 +339,36 @@ function addGPLabels(viz) {
 		.attr('class','gp-element')
 		.attr('transform',function(d) {
 			return "translate("+SCALES.xGPs(d.round)+","+GPS_Y+")";
+		})
+		.on('mouseenter', function() {
+			console.log(d3.selectAll("rect.gp-rect").attr("fill"));
+			d3.select($(this).children('rect.gp-rect').get(0))
+				.attr('fill', d3.rgb(d3.selectAll("rect.gp-rect").attr("fill")).darker());
+		})
+		.on('mouseleave', function() {
+			console.log(d3.selectAll("rect.gp-rect").attr("fill"));
+			d3.select($(this).children('rect.gp-rect').get(0))
+				.attr('fill', '#D62316');
 		});
+
+	// viz.selectAll("g.gp-element")
+	// 	.data(races)
+	// 	.append('path')
+	// 	.attr('d', 'M'+GP_PATH.delta+' 0 L'+GP_PATH.rectWidth+' 0 L'+(GP_PATH.rectWidth-GP_PATH.delta)+' '+GP_PATH.rectHeight+' L 0 '+GP_PATH.rectHeight+' Z')
+	// 	.attr('fill','blue')
+	// 	.attr('transform',function(d) {
+	// 		return "translate(-"+((GP_PATH.rectWidth-GP_PATH.delta)-30)+",0)";
+	// 	});
+
+
+	// viz.selectAll("g.gp-element")
+	// 	.data(races)
+	// 	.append('circle')
+	// 	.attr('r', '2')
+	// 	.attr('fill','red')
+	// 	// .attr('transform',function(d) {
+	// 	// 	return "translate(-"+(GP_PATH.delta+(GP_PATH.rectWidth/2))+",0)";
+	// 	// });
 
 	viz.selectAll("g.gp-element")
 		.data(races)
@@ -295,6 +377,8 @@ function addGPLabels(viz) {
 		.attr('transform',"translate("+(-GP_SHAPE_WIDTH/2)+","+(-GPS_Y)+")")
 		.attr('height',GP_SHAPE_HEIGHT)
 		.attr('width',GP_SHAPE_WIDTH)
+		.attr('fill','#D62316')
+		.attr('rx','3')
 		.text(function(d) {
 			return d.Circuit.Location.country;
 		})
@@ -302,8 +386,10 @@ function addGPLabels(viz) {
 	viz.selectAll("g.gp-element")
 		.data(races)
 		.append('text')
+		.attr('y',(GP_SHAPE_HEIGHT/2))
 		.attr('class','gp-label')
 		.attr('text-anchor', 'middle')
+		.attr('dominant-baseline', 'central')
 		.text(function(d) {
 			return d.Circuit.Location.country;
 		})
@@ -315,9 +401,11 @@ function addDriversElements(viz) {
 		.enter()
 		.append("g")
 		.attr("transform",function(data) {
-			return "translate("+INSETS.left+","+SCALES.y(parseInt(data.position))+")"
+			return "translate("+INSETS.left+","+(SCALES.y(parseInt(data.position)) - (DRIVER_RECT.rectHeight/2) )+")"
 		})
-		.attr('class','driver-element '+HIGHLIGHT_STATUS_CLASSES.plain)
+		.attr('class', function(d) {
+			return 'driver-element '+HIGHLIGHT_STATUS_CLASSES.plain+' '+d.driverId;
+		})
 		.on('click', function(d) {
 			//todo: si può implementare meglio
 			var selectedElem = d3.select(this);
@@ -330,31 +418,67 @@ function addDriversElements(viz) {
 
 	viz.selectAll("g.driver-element")
 		.data(drivers)
+		.append("rect")
+		.attr("class","driver-rect")
+		.attr("rx","0")
+		.attr("ry","15")
+		// .attr("y","0")
+		// .attr("x","0")
+		.attr("height", DRIVER_RECT.rectHeight)
+		.attr("width", DRIVER_RECT.rectWidth)
+		.style('fill', function(d){
+			return SCALES.colors(parseInt(d.position));
+		});
+
+	viz.selectAll("g.driver-element")
+		.data(drivers)
 		.append('text')
 		.attr('class','driver-label')
+		.attr('y', DRIVER_RECT.rectHeight/2)
+		.attr('x', '35')
 		.text(function(data) {
 			return data.familyName;
+		})
+
+	viz.selectAll("g.driver-element")
+		.data(drivers)
+		.append("g")                                //questi <g> servono per rendere possibile centrare le posizioni finali nei cerchi
+		.attr('class','final-position-g')
+		.attr("transform",function(data) {
+			return "translate(15,"+DRIVER_RECT.rectHeight/2+")"
+		});
+
+	viz.selectAll("g.final-position-g")
+		.data(drivers)
+		.append('circle')
+		.attr('class','final-position-circle')
+		.attr('r', '12')
+	
+	viz.selectAll("g.final-position-g")
+		.data(drivers)
+		.append('text')
+		.attr('class','driver-final-position')
+		.attr('text-anchor', 'middle')
+		.attr('dominant-baseline', 'central')
+		.text(function(data) {
+			return data.position;
 		})
 		.style('fill', function(d){
 			return SCALES.colors(parseInt(d.position))
 		});
-
-	//viz.selectAll("g.driver-element")
-	//	.data(drivers)
-	//	.append('rect')
 }
 
 function confScales() {
 	SCALES.xGPs = d3.scale.linear()
-		.domain([1,19+1])//todo: da cambiare: il range del dominio deve essere [round minimo, round massimo]
+		.domain([1,19.5])//todo: da cambiare: il range del dominio deve essere [round minimo, round massimo]
 		.range([DRIVERS_X,WIDTH - INSETS.right]);
 
 	SCALES.y = d3.scale.linear()
-		//todo: aggiungere limite superiore del dominio
-		.domain([1, 21]) //il dominio parte da 1 e non da 0 così possiamo utilizzare direttamente le posizioni della classifica finale (che partono da 1 ovviamente)
+		.domain([1, drivers.length]) //il dominio parte da 1 e non da 0 così possiamo utilizzare direttamente le posizioni della classifica finale (che partono da 1 ovviamente)
 		.range([INSETS.top, HEIGHT - INSETS.bottom]); //todo: da migliorare
 
 	SCALES.colors = d3.scale.linear().domain([1,(drivers.length-1)/2,drivers.length-1]).range(['#009933','#FFFFFF', '#ff3333']).interpolate(d3.interpolateRgb);
+	SCALES.colorsHighlight = d3.scale.category20();
 }
 
 //todo: sicuramente ci sono modi più efficienti di farlo, ma avendo a che fare con pochi elementi (circa 20 piloti, 20 gp, etc...) usare dei cicli e fare diversi selectAll non è un grosso problema e non si perde molto
@@ -363,7 +487,7 @@ function highlight(viz, dId, selectedElem) {
 
 
 	//assegna le classi in base alla selezione
-	viz.selectAll('path.results, g.position, g.driver-element, .position-text')
+	viz.selectAll('path.results, g.position, g.driver-element, g.final-position-g, rect.driver-rect')
 		.classed(HIGHLIGHT_STATUS_CLASSES.plain, false)                 // rimuove la classe plain a tutti
 		.classed(HIGHLIGHT_STATUS_CLASSES.dimmed, function(d) {         // dimmed se non è il driver selezionato E non è uno dei driver precedentemente selezionati
 			return !matchingDriverId(d,dId) && !d3.select(this).classed(HIGHLIGHT_STATUS_CLASSES.highlighted)
@@ -376,17 +500,39 @@ function highlight(viz, dId, selectedElem) {
 	viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.dimmed)
 		.attr('stroke-width', PATH_STROKE.dimmed);
 
-	//aumenta lo stroke dei piloti highlighted
+	//aumenta lo stroke dei piloti highlighted e cambia colore
 	viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.highlighted)
-		.attr('stroke-width', PATH_STROKE.highlighted);
+		.attr('stroke-width', PATH_STROKE.highlighted)
+		.style('stroke', function(d){
+			console.log(d.position)
+			return SCALES.colorsHighlight(parseInt(d.position))
+		});
 
-	//diminuisce il raggio dei position dei piloti dimmed
-	viz.selectAll('g.position.'+HIGHLIGHT_STATUS_CLASSES.dimmed+' circle.position-circle')
-		.attr('r', CIRCLES.radius.dimmed);
+	// //diminuisce il raggio dei position dei piloti dimmed
+	// viz.selectAll('g.position.'+HIGHLIGHT_STATUS_CLASSES.dimmed+' circle.position-circle')
+	// 	.attr('r', CIRCLES.radius.dimmed)
 
 	//aumenta il raggio dei position dei piloti highlighted
 	viz.selectAll('g.position.'+HIGHLIGHT_STATUS_CLASSES.highlighted+' circle.position-circle')
 		.attr('r', CIRCLES.radius.highlighted);
+
+	//cambia i colori
+	for (var i in drivers) {
+		//cambia colori position
+		viz.selectAll('g.position.'+HIGHLIGHT_STATUS_CLASSES.highlighted+'.'+drivers[i].driverId+' circle.position-circle, '+
+					 'g.position.'+HIGHLIGHT_STATUS_CLASSES.highlighted+'.'+drivers[i].driverId+' path.position-triangle-down, '+
+					 'g.position.'+HIGHLIGHT_STATUS_CLASSES.highlighted+'.'+drivers[i].driverId+' path.position-triangle-up')
+			.style('fill', function(d){
+				return d3.rgb(SCALES.colorsHighlight(parseInt(drivers[i].position))).darker();
+			});
+
+		//cambia colori driver elements
+		viz.selectAll('g.driver-element.'+HIGHLIGHT_STATUS_CLASSES.highlighted+'.'+drivers[i].driverId+' rect , '+
+					'g.driver-element.'+HIGHLIGHT_STATUS_CLASSES.highlighted+'.'+drivers[i].driverId+' g text')
+			.style('fill', function(d){
+				return d3.rgb(SCALES.colorsHighlight(parseInt(drivers[i].position))).darker();
+			});
+	}
 
 	//mostra le posizioni
 	viz.selectAll('g.position')
@@ -396,11 +542,17 @@ function highlight(viz, dId, selectedElem) {
 }
 
 function unhighlight(viz, dId, selectedElem) {
-	var lastOneSelected = viz.selectAll('g.driver-element.'+HIGHLIGHT_STATUS_CLASSES.highlighted)[0].length == 1 //se c'è almeno un altro pilota selezionato
+	var lastOneHighlighted = viz.selectAll('g.driver-element.'+HIGHLIGHT_STATUS_CLASSES.highlighted)[0].length == 1 //se c'è almeno un altro pilota selezionato
 
-	if (!lastOneSelected) {
+	// se non è l'ultimo evidenziato
+	if (!lastOneHighlighted) {
 		//assegna le classi in base alla selezione
-		viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.highlighted+', g.position.'+HIGHLIGHT_STATUS_CLASSES.highlighted+', g.driver-element.'+HIGHLIGHT_STATUS_CLASSES.highlighted+', .position-text.'+HIGHLIGHT_STATUS_CLASSES.highlighted)
+		viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.highlighted+
+					', g.position.'+HIGHLIGHT_STATUS_CLASSES.highlighted+
+					', g.driver-element.'+HIGHLIGHT_STATUS_CLASSES.highlighted+
+					', text.position-text.'+HIGHLIGHT_STATUS_CLASSES.highlighted+
+					', rect.driver-rect.'+HIGHLIGHT_STATUS_CLASSES.highlighted+
+					', g.final-position-g.'+HIGHLIGHT_STATUS_CLASSES.highlighted)
 			.classed(HIGHLIGHT_STATUS_CLASSES.dimmed, function(d) {         // dimmed se è il driver selezionato
 				return matchingDriverId(d,dId)
 			})
@@ -408,40 +560,97 @@ function unhighlight(viz, dId, selectedElem) {
 				return !matchingDriverId(d,dId)
 			});
 
-		//diminuisce lo stroke dei path dei piloti dimmed
+		//diminuisce lo stroke dei path dei piloti dimmed e cambia colore
 		viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.dimmed)
-			.attr('stroke-width', PATH_STROKE.dimmed);
+			.attr('stroke-width', PATH_STROKE.dimmed)
+			.style("stroke", function(d) {
+				return SCALES.colors(parseInt(d.position));
+			});
 
-		//diminuisce il raggio dei position dei piloti dimmed
+		//diminuisce il raggio dei position dei piloti dimmed e cambia colore
 		viz.selectAll('g.position.'+HIGHLIGHT_STATUS_CLASSES.dimmed+' circle.position-circle')
-			.attr('r', CIRCLES.radius.dimmed);
+			.attr('r', CIRCLES.radius.dimmed)
+			.style('fill', function(d) {
+				SCALES.colors(parseInt(standings[standings.length -1][d.RoundResult.Driver.driverId].positionText));
+			});
 
 		//nasconde i position
 		viz.selectAll('g.position.'+HIGHLIGHT_STATUS_CLASSES.dimmed)
 			.classed('hidden', true);
 
 
+		//cambia il colore a rect-driver e testo posizione finale
+		viz.selectAll('g.driver-element.'+HIGHLIGHT_STATUS_CLASSES.dimmed+' rect, '+
+			'g.driver-element.'+HIGHLIGHT_STATUS_CLASSES.dimmed+' g text')
+			.style('fill', function(d){
+				return SCALES.colors(parseInt(d.position));
+			})
 	} else {
 		unhighlightAll(viz)
 	}
 }
 
 function unhighlightAll(viz) {
-	viz.selectAll('path.results, g.position, g.driver-element, .position-text')     //li prendo tutti per ripristinare lo stato iniziale
+	viz.selectAll('path.results, g.position, g.driver-element, .position-text, g.final-position-g, rect.driver-rect')     //li prendo tutti per ripristinare lo stato iniziale
 		.classed(HIGHLIGHT_STATUS_CLASSES.highlighted, false)
 		.classed(HIGHLIGHT_STATUS_CLASSES.dimmed, false)
 		.classed(HIGHLIGHT_STATUS_CLASSES.plain, true);
 
 
-	//ripristina gli stroke di tutti i path
+	//ripristina gli stroke di tutti i path e cambia colore
 	viz.selectAll('path.results')
-		.attr('stroke-width', PATH_STROKE.plain);
+		.attr('stroke-width', PATH_STROKE.plain)
+		.style("stroke", function(d) {
+				return SCALES.colors(parseInt(d.position));
+			});
 
-	//diminuisce il raggio dei position dei piloti
+	//diminuisce il raggio dei position dei piloti e cambia colore
 	viz.selectAll('g.position circle.position-circle')
-		.attr('r', CIRCLES.radius.plain);
+		.attr('r', CIRCLES.radius.plain)
+		.style('fill', function(d) {
+			SCALES.colors(parseInt(standings[standings.length -1][d.RoundResult.Driver.driverId].positionText));
+		});
 
 	//nasconde i position
 	viz.selectAll('g.position')
 		.classed('hidden', true);
+
+	//cambia il colore a rect-driver e testo posizione finale
+	viz.selectAll('g.driver-element  rect, '+
+				'g.driver-element g text')
+		.style('fill', function(d){
+			return SCALES.colors(parseInt(d.position));
+		})
+}
+
+function addDriversHeaderElements(viz) {
+	// viz.append('circle')
+	// 	.attr('r',2)
+	// 	.attr('fill','red')
+	// 	.attr('x',0)
+	// 	.attr('y',0)
+
+	viz.append('g')
+		.attr('id','driversHeader')
+		.attr('transform',function(d) {
+			return "translate(0,6)";
+		})
+
+	viz.select('#driversHeader')
+		.append('image')
+		.attr('id','helmetIcon')
+		.attr('xlink:href','img/f1_helmet_icon_2.png')
+		.attr('width','170')
+		.attr('height','49');
+
+	viz.select('#driversHeader')
+		.append('text')
+		.attr('id','driversHeader')
+		.attr('x','10')
+		.attr('y','10')
+
+	viz.select('#driversHeader')
+		.append('tspan')
+		.text('test');
+
 }
