@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title></title>
-    <link rel="stylesheet" href="css/style.css"/>
+
     <link rel="stylesheet" href="bower_components\bootstrap\dist\css\bootstrap.min.css"/>
     <link rel="stylesheet" href="bower_components\bootstrap-select\dist\css\bootstrap-select.min.css"/>
+    <link rel="stylesheet" href="css/style.css"/>
 
     <script src="https://use.fontawesome.com/23ffabee20.js"></script>
     <script type="text/javascript" src="bower_components\jquery\dist\jquery.min.js"></script>
@@ -16,7 +17,6 @@
     <script type="text/javascript" src="js/F1WorldChampionship_chart.js"></script>
 </head>
 <body>
-
     <div id="vizContainer">
         <div id="titleContainer">
             <div id="titleDiv">
@@ -58,6 +58,39 @@
             © 2016 - Made with <s>love</s> a keyboard by Raffaele Giannella and Matteo Borghi
             <span><a href="https://github.com/lele92/F1_VisualAnalytics" target="_blank"><i class="fa fa-github" aria-hidden="true"></i> This project on GitHub</a></span>
         </footer>
+    </div>
+    <!-- Modal Pilot -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header" id="modal-pilot-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h3 class="modal-title" id="pilotModalTitle">Pilot Insight</h3>
+                </div>
+                <div class="modal-body" id="modal-pilot-body">
+                </div>
+                <div class="modal-footer" id="modal-pilot-footer">
+                    <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal GP -->
+    <div class="modal fade" id="gpModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header" id="modal-gp-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h3 class="modal-title" id="gpModalTitle">GP Insight</h3>
+                </div>
+                <div class="modal-body" id="modal-gp-body">
+                </div>
+                <div class="modal-footer" id="modal-gp-footer">
+                    <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>
