@@ -4,24 +4,59 @@
     <meta charset="UTF-8">
     <title></title>
     <link rel="stylesheet" href="css/style.css"/>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-    <script   src="https://code.jquery.com/jquery-2.2.3.min.js"   integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="   crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
-    <script src="node_modules/d3/d3.min.js" charset="utf-8"></script>
-    <!--<script src="node_modules/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script>-->
+    <link rel="stylesheet" href="bower_components\bootstrap\dist\css\bootstrap.min.css"/>
+    <link rel="stylesheet" href="bower_components\bootstrap-select\dist\css\bootstrap-select.min.css"/>
+
+    <script src="https://use.fontawesome.com/23ffabee20.js"></script>
+    <script type="text/javascript" src="bower_components\jquery\dist\jquery.min.js"></script>
+    <script type="text/javascript" src="bower_components\bootstrap\dist\js\bootstrap.min.js"></script>
+    <script type="text/javascript" src="node_modules/d3/d3.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="bower_components\bootstrap-select\dist\js\bootstrap-select.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="js/utility.js"></script>
     <script type="text/javascript" src="js/F1WorldChampionship_chart.js"></script>
 </head>
 <body>
+
     <div id="vizContainer">
         <div id="titleContainer">
-            <img src="img/Logo_f1_title.png" height="40" id="imgTitle">
+            <div id="titleDiv">
+                <img src="img/Logo_f1_title.png" height="40" id="imgTitle">
+            </div>
+
+            <div id="exploreFormGroup">
+                <span id="exploreLbl">Explore: </span>
+                <select class="form-control" id="exploreSelect">
+                    <option> </option>
+                    <option>Top 3</option>
+                    <option>Last 3</option>
+                    <option>The roller coaster</option>
+                </select>
+            </div>
+            <div id="constructorFormGroup">
+                <span id="constructorLbl">Select constructors: </span>
+                <div id="constructorSelectDiv">
+                    <select multiple class="form-control selectpicker" id="constructorSelect">
+                        <option>Ferrari</option>
+                        <option>Force India</option>
+                        <option>Lotus F1</option>
+                        <option>Manor Marussia</option>
+                        <option>McLaren</option>
+                        <option>Mercedes</option>
+                        <option>Red Bull</option>
+                        <option>Sauber</option>
+                        <option>Toro Rosso</option>
+                        <option>Williams</option>
+                    </select>
+                </div>
+
+            </div>
+            <a id="tutorialBtn" class="glyphicon glyphicon-question-sign" aria-hidden="true" href="http://prezi.com/ffweuujpqodd/?utm_campaign=share&utm_medium=copy&rc=ex0share" target="_blank"></a>
         </div>
 
         <div  id="chart"></div>
         <footer>
             © 2016 - Made with <s>love</s> a keyboard by Raffaele Giannella and Matteo Borghi
-            <span><a href="https://github.com/lele92/F1_VisualAnalytics" target="_blank">> This project on GitHub</a></span>
+            <span><a href="https://github.com/lele92/F1_VisualAnalytics" target="_blank"><i class="fa fa-github" aria-hidden="true"></i> This project on GitHub</a></span>
         </footer>
     </div>
 </body>

@@ -91,7 +91,7 @@ text.driver-final-position {
 }
 
 #imgTitle {
-    display: block;
+    display: inline;
     padding-bottom: 5px;
     padding-top: 5px;
     padding-left: 5px;
@@ -108,16 +108,11 @@ text.driver-final-position {
 
 #titleContainer {
     background-color: #323639;
-    border-bottom: 5px solid #3b4044;
-    display: block;
+    margin-bottom: 5px;
 }
 
 g.gp-element:hover {
     cursor: pointer;
-}
-
-#titleContainer {
-    /*width: 2500px;*/
 }
 
 #driversStandingRect {
@@ -130,7 +125,7 @@ g.gp-element:hover {
 footer {
     background-color: #323639;
     color: #656E75;
-    font-size: small;
+    font-size: 15px;
 }
 
 footer span {
@@ -147,6 +142,110 @@ g.info-g text {
 g.info-g:hover {
     cursor: pointer;
 }
+
+#tutorialBtn {
+    float: right;
+    font-size: 20px;
+    color: #656E75;
+    vertical-align: middle;
+    margin: 10px;
+}
+
+#tutorialBtn:hover {
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+
+}
+
+#exploreLbl, #constructorLbl {
+    color: white;
+    font-size: 23px;
+}
+
+#exploreSelect {
+    display: inline-block;
+    width: 150px;
+    height: 34px;
+    padding: 0px;
+    font-size: 15px;
+    line-height: 1;
+    color: #FFF;
+    background-color: #323639;
+    background-image: none;
+    border: 2px solid white;
+    border-radius: 12px;
+}
+
+#titleContainer .filter-option {
+    background-color: #323639;
+    color: white;
+}
+
+#titleContainer .btn {
+    background-color: #323639;
+    border-radius: 12px;
+    border: 2px solid white;
+    vertical-align: middle;
+}
+
+#titleContainer .btn-group {
+    border-radius: 12px;
+    vertical-align: middle;
+}
+
+#titleContainer .dropdown-menu {
+    background-color: #323639;
+    color: white;
+}
+
+#titleContainer li>a{
+    color: white;
+}
+
+#titleContainer li>a:hover{
+    background-color: #3b4044;
+}
+
+#constructorSelect {
+    display: inline-block;
+    width: 300px;
+    height: 30px;
+    padding: 0px;
+    font-size: 22px;
+    line-height: 1;
+    color: #FFF;
+    background-color: #323639;
+    background-image: none;
+    border: 2px solid white;
+    border-radius: 12px;
+}
+
+#exploreFormGroup {
+    display: inline-block;
+    margin-left: 25px;
+}
+
+#constructorFormGroup {
+    display: inline-block;
+    margin-left: 20px;
+}
+
+#constructorSelectDiv {
+    display: inline-block;
+}
+
+#constructorLbl, #exploreLbl {
+    font-size: 15px;
+}
+
+#titleDiv {
+    display: inline-block;
+    background-color: #4D5459;
+    padding-right: 10px;
+    border-bottom-right-radius: 10px;
+}
+
 
 
 

@@ -1,7 +1,7 @@
 const WINDOW_DIM = getWindowDim();
 const WIDTH_WINDOW = WINDOW_DIM.width;
-const HEIGHT_WINDOW = WINDOW_DIM.height-60;
-const WIDTH = 2300;
+const HEIGHT_WINDOW = WINDOW_DIM.height-71;
+const WIDTH = 2350;
 const HEIGHT = 1200;
 const SCALES = {};
 const GPS_Y = 0;
@@ -89,11 +89,32 @@ const STATUSES = {
 	]
 }
 
+var viz;
 var races = [];
 var drivers = [];
 var standings = [];
 
+//todo: liste statiche, non generate dinamicamente
+var topThree = ['hamilton','rosberg','vettel'];
+var lastThree = ['merhi','rossi','stevens'];
+var rollerCoaster = ['massa'];
+var constructors = ['Ferrari',
+					'Force India',
+					'Lotus F1',
+					'Manor Marussia',
+					'McLaren',
+					'Mercedes',
+					'Red Bull',
+					'Sauber',
+					'Toro Rosso',
+					'Williams'];
+
 window.onload = function() {
+	
+	$("#tutorialBtn").click(function() {});
+	$("testBtn").click(function() {
+
+	});
 	// carica i dati
 	d3.json("./data/F1_data.json", function(data) {
 		races = convertRoundToInt(data.races);
@@ -103,10 +124,28 @@ window.onload = function() {
 	})
 }
 
+$(document).ready(function() {
+	$("#exploreSelect").change(function() {
+		unhighlightAll();
+		var opt = $(this).val();
+		switch (opt) {
+			case 'Top 3':
+				highlightDrivers(topThree);
+				break;
+			case 'Last 3':
+				highlightDrivers(lastThree);
+				break;
+			case 'The roller coaster':
+				highlightDrivers(rollerCoaster);
+				break;
+		}
+	});
+});
+
 function buildViz() {
 	confScales();
 
-	var viz = d3.select("#chart")
+	viz = d3.select("#chart")
 		.append("svg")
 		.attr('width',WIDTH_WINDOW)
 		.attr('height',HEIGHT_WINDOW)
@@ -114,21 +153,20 @@ function buildViz() {
 		// .attr('preserveAspectRatio','none')
 
 	// addTopLine(viz)
-	addDriversStandingsRect(viz);
-	addTickLines(viz);
-	addLightTickLines(viz);
-	//todo: aggiungere qui tick colorati (per +1, +2, etc..)
-	addGPElements(viz);
-	addDriverResultsPath(viz);
-	addDriversElements(viz);
+	addDriversStandingsRect();
+	addTickLines();
+	addLightTickLines();
+	addGPElements();
+	addDriverResultsPath();
+	addDriversElements();
 	for (var i in drivers) {
-		addPositionElements(viz,drivers[i].driverId,drivers[i].position,drivers[i].Results, standings);
+		addPositionElements(drivers[i].driverId,drivers[i].position,drivers[i].Results, standings);
 	}
-	addDriversHeaderElements(viz);
+	addDriversHeaderElements();
 
 }
 
-function addDriversStandingsRect(viz) {
+function addDriversStandingsRect() {
 	viz.append('rect')
 		.attr('id','driversStandingRect')
 		.attr('height',HEIGHT-10)
@@ -136,10 +174,10 @@ function addDriversStandingsRect(viz) {
 		.attr('x','5')
 		.attr('y','3')
 		.attr('ry','10')
-		.attr('rx','10');
+		.attr('rx','10')
 }
 
-function addTopLine(viz) {
+function addTopLine() {
 	viz.append('line')
 		.attr('id','topLine')
 		.attr('x1',0)
@@ -148,7 +186,7 @@ function addTopLine(viz) {
 		.attr('y2',0);
 }
 
-function addPositionElements(viz, driverId, driverFinalPosition, res, standings) {
+function addPositionElements(driverId, driverFinalPosition, res, standings) {
 	viz.selectAll("g.position."+driverId+"."+HIGHLIGHT_STATUS_CLASSES.plain)
 		.data(res)
 		.enter()
@@ -280,7 +318,7 @@ function addPositionElements(viz, driverId, driverFinalPosition, res, standings)
 
 }
 
-function addDriverResultsPath(viz) {
+function addDriverResultsPath() {
 	viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.plain)
 		.data(drivers)
 		.enter()
@@ -306,9 +344,9 @@ function addDriverResultsPath(viz) {
 			//todo: si può implementare meglio
 			var selectedElem = d3.select(this);
 			if(selectedElem.classed(HIGHLIGHT_STATUS_CLASSES.plain) || selectedElem.classed(HIGHLIGHT_STATUS_CLASSES.dimmed)) {
-				highlight(viz, d.driverId, selectedElem);
+				highlight(d.driverId, selectedElem);
 			} else {
-				unhighlight(viz, d.driverId, selectedElem);
+				unhighlight(d.driverId, selectedElem);
 			}
 		})
 		.style('stroke', function(d,i) {
@@ -320,7 +358,7 @@ function addDriverResultsPath(viz) {
 		})
 }
 
-function addTickLines(viz) {
+function addTickLines() {
 	viz.selectAll('line.tickline')
 		.data(races)
 		.enter()
@@ -341,7 +379,7 @@ function addTickLines(viz) {
 		})
 }
 
-function addLightTickLines(viz) {
+function addLightTickLines() {
 	viz.selectAll('line.tickline-light')
 		.data(races)
 		.enter()
@@ -362,7 +400,7 @@ function addLightTickLines(viz) {
 		})
 }
 
-function addGPElements(viz) {
+function addGPElements() {
 	viz.selectAll("g.gp-element")
 		.data(races)
 		.enter()
@@ -424,7 +462,7 @@ function addGPElements(viz) {
 		})
 }
 
-function addDriversElements(viz) {
+function addDriversElements() {
 	viz.selectAll("g.driver-element."+HIGHLIGHT_STATUS_CLASSES.plain)
 		.data(drivers)
 		.enter()
@@ -439,9 +477,9 @@ function addDriversElements(viz) {
 			//todo: si può implementare meglio
 			var selectedElem = d3.select(this);
 			if(selectedElem.classed(HIGHLIGHT_STATUS_CLASSES.plain) || selectedElem.classed(HIGHLIGHT_STATUS_CLASSES.dimmed)) {
-				highlight(viz, d.driverId, selectedElem);
+				highlight(d.driverId, selectedElem);
 			} else {
-				unhighlight(viz, d.driverId, selectedElem);
+				unhighlight(d.driverId, selectedElem);
 			}
 		})
 
@@ -454,7 +492,6 @@ function addDriversElements(viz) {
 			return "translate("+INSETS.left+","+SCALES.y(parseInt(data.position))+")"
 		})
 		.on('mouseenter', function() {
-			console.log($(this).children('circle.info-circle').get(0))
 			d3.select($(this).children('circle.info-circle').get(0))
 				.attr('fill', 'white');
 		})
@@ -545,7 +582,7 @@ function confScales() {
 }
 
 //todo: sicuramente ci sono modi più efficienti di farlo, ma avendo a che fare con pochi elementi (circa 20 piloti, 20 gp, etc...) usare dei cicli e fare diversi selectAll non è un grosso problema e non si perde molto
-function highlight(viz, dId, selectedElem) {
+function highlight(dId) {
 	//todo: da rivedere e migliorare
 
 
@@ -604,7 +641,7 @@ function highlight(viz, dId, selectedElem) {
 		});
 }
 
-function unhighlight(viz, dId, selectedElem) {
+function unhighlight(dId) {
 	var lastOneHighlighted = viz.selectAll('g.driver-element.'+HIGHLIGHT_STATUS_CLASSES.highlighted)[0].length == 1 //se c'è almeno un altro pilota selezionato
 
 	// se non è l'ultimo evidenziato
@@ -649,11 +686,11 @@ function unhighlight(viz, dId, selectedElem) {
 				return SCALES.colors(parseInt(d.position));
 			})
 	} else {
-		unhighlightAll(viz)
+		unhighlightAll()
 	}
 }
 
-function unhighlightAll(viz) {
+function unhighlightAll() {
 	viz.selectAll('path.results, g.position, g.driver-element, .position-text, g.final-position-g, rect.driver-rect')     //li prendo tutti per ripristinare lo stato iniziale
 		.classed(HIGHLIGHT_STATUS_CLASSES.highlighted, false)
 		.classed(HIGHLIGHT_STATUS_CLASSES.dimmed, false)
@@ -686,7 +723,13 @@ function unhighlightAll(viz) {
 		})
 }
 
-function addDriversHeaderElements(viz) {
+function highlightDrivers(driversList) {
+	for (var i in driversList) {
+		highlight(driversList[i])
+	}
+}
+
+function addDriversHeaderElements() {
 	// viz.append('circle')
 	// 	.attr('r',2)
 	// 	.attr('fill','red')
