@@ -18,9 +18,9 @@ const GP_SHAPE_HEIGHT = 30;
 const POSITION_CIRCLES = {
 	'radius': {
 		'plain': 0,
-		'highlighted':15,
+		'highlighted':18,
 		'dimmed': 0,
-		'mouseover': 22
+		'mouseover': 24
 	},
 	'stroke': {
 		'plain': 0,
@@ -29,7 +29,7 @@ const POSITION_CIRCLES = {
 };
 
 const TRIANGLES = {
-	'area': 600
+	'area': 900
 }
 
 const DRIVER_RECT = {
@@ -110,11 +110,7 @@ var constructors = ['Ferrari',
 					'Williams'];
 
 window.onload = function() {
-	
-	$("#tutorialBtn").click(function() {});
-	$("testBtn").click(function() {
 
-	});
 	// carica i dati
 	d3.json("./data/F1_data.json", function(data) {
 		races = convertRoundToInt(data.races);
@@ -132,6 +128,7 @@ window.onload = function() {
 
 $(document).ready(function() {
 	$("#exploreSelect").change(function() {
+		$("#constructorSelect").val('');
 		unhighlightAll();
 		var opt = $(this).val();
 		switch (opt) {
@@ -145,6 +142,15 @@ $(document).ready(function() {
 				highlightDrivers(rollerCoaster);
 				break;
 		}
+	});
+
+	$("#constructorSelect").change(function() {
+		$("#exploreSelect").val('');
+		unhighlightAll();
+		var opt = $(this).val();
+		constructorDrivers = findConstructorDrivers(opt, drivers);
+		console.log(constructorDrivers);
+		highlightDrivers(constructorDrivers);
 	});
 });
 
@@ -687,7 +693,7 @@ function addDriversElements() {
 		.append("g")                                //questi <g> servono per rendere possibile centrare le posizioni finali nei cerchi
 		.attr('class','final-position-g')
 		.attr("transform",function(data) {
-			return "translate(35,"+DRIVER_RECT.rectHeight/2+")"
+			return "translate(34,"+DRIVER_RECT.rectHeight/2+")"
 		});
 
 	viz.selectAll("g.final-position-g")

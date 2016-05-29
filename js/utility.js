@@ -49,3 +49,14 @@ function getStandingsPosition(round, standings, driverId) {
 	}
 
 }
+
+function findConstructorDrivers(constructorName, drivers) {
+	var driversId = [];
+	for (var i in drivers) {
+		if (drivers[i].Constructor.name == constructorName) {
+			driversId.push(drivers[i].driverId);
+		}
+	}
+
+	return driversId;
+}

@@ -5,14 +5,12 @@
     <title></title>
 
     <link rel="stylesheet" href="bower_components\bootstrap\dist\css\bootstrap.min.css"/>
-    <link rel="stylesheet" href="bower_components\bootstrap-select\dist\css\bootstrap-select.min.css"/>
     <link rel="stylesheet" href="css/style.css"/>
 
     <script src="https://use.fontawesome.com/23ffabee20.js"></script>
     <script type="text/javascript" src="bower_components\jquery\dist\jquery.min.js"></script>
     <script type="text/javascript" src="bower_components\bootstrap\dist\js\bootstrap.min.js"></script>
     <script type="text/javascript" src="node_modules/d3/d3.min.js" charset="utf-8"></script>
-    <script type="text/javascript" src="bower_components\bootstrap-select\dist\js\bootstrap-select.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="js/utility.js"></script>
     <script type="text/javascript" src="js/F1WorldChampionship_chart.js"></script>
 </head>
@@ -23,8 +21,25 @@
                 <img src="img/Logo_f1_title.png" height="40" id="imgTitle">
             </div>
 
+            <div id="constructorFormGroup">
+                <span id="constructorLbl">Select a constructor: </span>
+                <select class="form-control " id="constructorSelect">
+                    <option></option>
+                    <option>Ferrari</option>
+                    <option>Force India</option>
+                    <option>Lotus F1</option>
+                    <option>Manor Marussia</option>
+                    <option>McLaren</option>
+                    <option>Mercedes</option>
+                    <option>Red Bull</option>
+                    <option>Sauber</option>
+                    <option>Toro Rosso</option>
+                    <option>Williams</option>
+                </select>
+            </div>
+
             <div id="exploreFormGroup">
-                <span id="exploreLbl">Explore: </span>
+                <span id="exploreLbl"> or look at some curiosities: </span>
                 <select class="form-control" id="exploreSelect">
                     <option> </option>
                     <option>Top 3</option>
@@ -32,24 +47,9 @@
                     <option>The roller coaster</option>
                 </select>
             </div>
-            <div id="constructorFormGroup">
-                <span id="constructorLbl">Select constructors: </span>
-                <div id="constructorSelectDiv">
-                    <select multiple class="form-control selectpicker" id="constructorSelect">
-                        <option>Ferrari</option>
-                        <option>Force India</option>
-                        <option>Lotus F1</option>
-                        <option>Manor Marussia</option>
-                        <option>McLaren</option>
-                        <option>Mercedes</option>
-                        <option>Red Bull</option>
-                        <option>Sauber</option>
-                        <option>Toro Rosso</option>
-                        <option>Williams</option>
-                    </select>
-                </div>
 
-            </div>
+            <span id="finalSentence"> ...or simply click wherever you want and explore ...</span>
+
             <a id="tutorialBtn" class="glyphicon glyphicon-question-sign" aria-hidden="true" href="http://prezi.com/ffweuujpqodd/?utm_campaign=share&utm_medium=copy&rc=ex0share" target="_blank"></a>
         </div>
 
