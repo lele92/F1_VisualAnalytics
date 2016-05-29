@@ -148,5 +148,50 @@ g.info-g:hover {
     cursor: pointer;
 }
 
+div.center {
+    padding-left: 3px;
+    padding-bottom: 3px;
+    padding-top: 3px;
+}
 
+div.gpmodal {
+    padding-left: 50px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
 
+#pilotModalTitle, #gpModalTitle {
+    text-align: center;
+}
+
+div.pilotmodal {
+    padding-left: 10px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+
+span.labels {
+    font-weight: bold;
+}
+
+i.fa {
+    padding-right: 3px;
+}
+
+div.modal-header {
+    text-align: left;
+}
+
+div.tooltip-inner {
+    text-align: left;
+    background-color: #FFFFFF;
+    color: #000000;
+}
+
+.tooltip.left .tooltip-arrow {
+    border-left-color: #FFFFFF; !important;
+}
+
+.product .img-responsive {
+    margin: 0 auto;
+}

@@ -100,6 +100,12 @@ window.onload = function() {
 		drivers = data.drivers;
 		standings = data.standings;
 		buildViz();
+
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip({
+                'container': 'body'
+            })
+        })
 	})
 }
 
@@ -153,6 +159,55 @@ function addPositionElements(viz, driverId, driverFinalPosition, res, standings)
 		.data(res)
 		.enter()
 		.append("g")
+        .attr('data-html', 'true')
+        .attr('data-toggle', 'tooltip')
+        .attr('data-placement', 'left')
+        .attr('data-original-title', function(d) {
+            var iconText = "<i class='fa fa-chevron-right'></i>"
+            var driver = "<div class='center'>" + iconText + "<span class='labels'> Driver: </span><span>" + d.RoundResult.Driver.familyName + "</span></div>";
+            var position = "<div class='center'>" + iconText + "<span class='labels'> Final Position: </span><span>" + d.RoundResult.position + "</span></div>";
+            var status = "<div class='center'>" + iconText + "<span class='labels'> Status: </span><span>" + d.RoundResult.status + "</span></div>";
+            var points = "<div class='center'>" + iconText + "<span class='labels'> Gain Point: </span><span>" + d.RoundResult.points + "</span></div>";
+            var grid = "<div class='center'>" + iconText + "<span class='labels'> Start Grid Position: </span><span>" + d.RoundResult.grid + "</span></div>";
+            var construct = "<div class='center'>" + iconText + "<span class='labels'> Construct: </span><span>" + d.RoundResult.Constructor.name + "</span></div>";
+            //var selText = $("<div class='well' class='lbl-panel-span'>"+getSelectionText(note.target.id,note.target.start,note.target.end)+"</div>")
+            //return "ciao bel"
+            return driver + position + status + points + grid + construct;
+
+            //$("#modal-pilot-header").attr("background-color", function(d) {
+            //        return d3.rgb(SCALES.colors(parseInt(driverFinalPosition))).darker();
+            //    }
+            //);)
+        })
+        //.attr("title", "Hi")
+        .on('click', function(d) {
+            var $modal_body = $("#modal-pilot-body").empty();
+            var iconText = "<i class='fa fa-chevron-right'></i>"
+            var driver = $("<div class='center'>"+iconText+"<span class='labels'> Driver: </span><span>"+ d.RoundResult.Driver.familyName+"</span></div>");
+            var position = $("<div class='center'>"+iconText+"<span class='labels'> Final Position: </span><span>"+ d.RoundResult.position+"</span></div>");
+            var status = $("<div class='center'>"+iconText+"<span class='labels'> Status: </span><span>"+ d.RoundResult.status+"</span></div>");
+            var points = $("<div class='center'>"+iconText+"<span class='labels'> Gain Point: </span><span>"+ d.RoundResult.points+"</span></div>");
+            var grid = $("<div class='center'>"+iconText+"<span class='labels'> Start Grid Position: </span><span>"+d.RoundResult.grid+"</span></div>");
+            var construct = $("<div class='center'>"+iconText+"<span class='labels'> Construct: </span><span>"+d.RoundResult.Constructor.name+"</span></div>");
+            //var selText = $("<div class='well' class='lbl-panel-span'>"+getSelectionText(note.target.id,note.target.start,note.target.end)+"</div>")
+            content = driver + position + status + points + grid + construct
+            $modal_body.append(driver);
+            $modal_body.append(position);
+            $modal_body.append(status);
+            $modal_body.append(points);
+            $modal_body.append(grid);
+            $modal_body.append(construct);
+            d3.select("#modal-pilot-header")
+                .style("background-color", function(d) {
+                    return d3.rgb(SCALES.colorsHighlight(parseInt(driverFinalPosition)));
+                });
+            //$("#modal-pilot-header").attr("background-color", function(d) {
+            //        return d3.rgb(SCALES.colors(parseInt(driverFinalPosition))).darker();
+            //    }
+            //);
+
+            $("#myModal").modal('show');
+        })
 		.attr('class','hidden position '+driverId+" "+HIGHLIGHT_STATUS_CLASSES.plain)
 		.attr('transform',function(d) {
 				return "translate("+SCALES.xGPs(parseInt(d.round))+","+SCALES.y(parseInt(d.RoundResult.position))+")";
@@ -378,7 +433,42 @@ function addGPElements(viz) {
 		.on('mouseleave', function() {
 			d3.select($(this).children('rect.gp-rect').get(0))
 				.attr('fill', '#D62316');
-		});
+		})
+        .on('click', function(d) {
+            console.log(d)
+            var $modal_body = $("#modal-gp-body").empty();
+            var iconText = "<i class='fa fa-chevron-right'></i>";
+            var spanClass = "class='labels'";
+            var divClass = "class='gpmodal'";
+            var raceName = $("<div "+divClass+">" + iconText + "<span "+spanClass+"'> Race Name: </span><span>" + d.raceName + "</span></div>");
+            var circuitName = $("<div "+divClass+">" + iconText + "<span "+spanClass+"> Circuit Name: </span><span>" + d.Circuit.circuitName + "</span></div>");
+            var country = $("<div "+divClass+">" + iconText + "<span "+spanClass+"> Status: </span><span>" + d.Circuit.Location.country + "</span></div>");
+            var location = $("<div "+divClass+">" + iconText + "<span "+spanClass+"> Gain Point: </span><span>" + d.Circuit.Location.locality + "</span></div>");
+            var europeanTime = $("<div "+divClass+">" + iconText + "<span "+spanClass+"> Date: </span><span>" + d.date + "</span></div>");
+            var date = $("<div "+divClass+">" + iconText + "<span "+spanClass+"> Date: </span><span>" + d.date + "</span></div>");
+            var linkWikipedia = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Link GP Wikipedia: </span><span><a target='_blank' href='"+ d.url+"' >"+d.raceName+"</a></span></div>");
+            var circuit_image = $("<div><img class='center-block' src='img/gp/"+ d.Circuit.circuitId+".png'></div>");
+            //var selText = $("<div class='well' class='lbl-panel-span'>"+getSelectionText(note.target.id,note.target.start,note.target.end)+"</div>")
+            $modal_body.append(raceName);
+            $modal_body.append(circuitName);
+            $modal_body.append(country);
+            $modal_body.append(location);
+            $modal_body.append(europeanTime);
+            $modal_body.append(date);
+            $modal_body.append(linkWikipedia);
+            $modal_body.append(circuit_image);
+            //d3.select("#modal-gp-header")
+            //    .style("background-color", function (d) {
+            //        return d3.rgb(SCALES.colorsHighlight(parseInt(driverFinalPosition)));
+            //    });
+            //$("#modal-pilot-header").attr("background-color", function(d) {
+            //        return d3.rgb(SCALES.colors(parseInt(driverFinalPosition))).darker();
+            //    }
+            //);
+            $("#gpModalTitle").text(d.raceName);
+
+            $("#gpModal").modal('show');
+        });
 
 	// viz.selectAll("g.gp-element")
 	// 	.data(races)
@@ -461,7 +551,59 @@ function addDriversElements(viz) {
 		.on('mouseleave', function() {
 			d3.select($(this).children('circle.info-circle').get(0))
 				.attr('fill', '#656E75');
-		});
+		})
+        .on('click', function(d) {
+            //console.log(d)
+            var $modal_body = $("#modal-pilot-body").empty();
+            var iconText = "<i class='fa fa-chevron-right'></i>";
+            var spanClass = "class='labels'";
+            var divClass = "class='pilotmodal'";
+            var container = $("<div class=''></div>");
+            var container_row = $("<div class='row'></div>");
+            var div_images = $("<div id="+d.driverId+"_photo"+" class='col-md-6 div_pilot_image'></div>");
+            var div_info = $("<div id="+d.driverId+"_info"+" class='col-md-6 div_pilot_info'></div>");
+
+            var row_pilot_image = $("<div class='row'><div class='col-md-12 name centered'><img width='200' class='center-block' src='img/Pilot/"+ d.driverId+".png'></div></div>");
+            var row_constructor_image = $("<div class='row'><div class='col-md-12 name centered'>" +
+            "<img class='center-block' style='max-width:200px' src='img/Constructor/"+ d.Constructor.constructorId+".png'></div></div>");
+            div_images.append(row_pilot_image);
+            div_images.append(row_constructor_image);
+
+            var name = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Name: </span><span>"+ d.givenName+"</span></div>");
+            var familyName = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Family Name: </span><span>"+ d.familyName+"</span></div>");
+            var nationality = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Nationality: </span><span>"+ d.nationality+"</span></div>");
+            var birth = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Date of Birth: </span><span>"+ d.dateOfBirth+"</span></div>");
+            var finalPosition = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Final Position: </span><span>"+d.position+"</span></div>");
+            var finalPoints = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Points: </span><span>"+d.points+"</span></div>");
+            var Constructor = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Constructor: </span><span>"+d.Constructor.name+"</span></div>");
+            var permanentNumber = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Permanent Number: </span><span>"+d.permanentNumber+"</span></div>");
+            var linkWikipedia = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Link Wikipedia: </span><span><a target='_blank' href='"+ d.url+"' >"+d.familyName+"</a></span></div>");
+            //var selText = $("<div class='well' class='lbl-panel-span'>"+getSelectionText(note.target.id,note.target.start,note.target.end)+"</div>")
+            //content = driver + position + status + points + grid + construct
+            div_info.append(name);
+            div_info.append(familyName);
+            div_info.append(nationality);
+            div_info.append(birth);
+            div_info.append(finalPosition);
+            div_info.append(finalPoints);
+            div_info.append(Constructor);
+            div_info.append(permanentNumber);
+            div_info.append(linkWikipedia);
+
+            container_row.append(div_images);
+            container_row.append(div_info);
+            container.append(container_row);
+            $modal_body.append(container);
+
+            d3.select("#modal-pilot-header")
+                .style("background-color", function() {
+                    return d3.rgb(SCALES.colorsHighlight(parseInt(d.position)));
+                });
+
+            $("#pilotModalTitle").text(d.givenName +" "+ d.familyName);
+
+            $("#myModal").modal('show');
+        });
 
 	viz.selectAll("g.info-g")
 		.data(drivers)
