@@ -63,12 +63,19 @@ const STATUSES = {
 		'Collision',
 		'Spun off'
 	],
+    'lapped': [
+        '+1 Lap',
+        '+2 Laps',
+        '+3 Laps',
+        '+4 Laps',
+        '+5 Laps',
+        '+6 Laps'
+    ],
 	'failure': [
 		'Engine',
 		'Gearbox',
 		'Transmission',
 		'Electrical',
-		'Spun off',
 		'Suspension',
 		'Brakes',
 		'Tyre',
@@ -176,6 +183,8 @@ function buildViz() {
 	}
 	addDriversHeaderElements();
 
+    eredita()
+
 }
 
 function addDriversStandingsRect() {
@@ -223,11 +232,26 @@ function addPositionElements(driverId, driverFinalPosition, res, standings) {
             var points = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Points: </span><span>" + prevPoint+" (+"+d.RoundResult.points+")" + "</span></div>";
             var grid = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Grid Position: </span><span>" + d.RoundResult.grid + "</span></div>";
             var construct = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Constructor: </span><span>" + d.RoundResult.Constructor.name + "</span></div>";
-            var divStatus;
-            if (STATUSES.accident.indexOf(d.RoundResult.status) != -1) divStatus = "class='red'"
-            if (STATUSES.failure.indexOf(d.RoundResult.status) != -1) divStatus = "class='yellow'"
-            var status = "<div "+divClass+">" + iconText + "<span class='labels'> Status: </span><span "+divStatus+">" + d.RoundResult.status + "</span></div>";
-            return driver + grid + status + points + position + construct;
+            var laps = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Laps: </span><span>" + d.RoundResult.laps + "</span></div>";
+            var divStatus = "";
+            var spanLabel = "";
+            if (STATUSES.accident.indexOf(d.RoundResult.status) != -1) {
+                spanLabel = "Finished with a ";
+                divStatus = "class='red'";
+            }
+            if (STATUSES.failure.indexOf(d.RoundResult.status) != -1) {
+                spanLabel = "Failure: ";
+                divStatus = "class='yellow'";
+            }
+            if (STATUSES.lapped.indexOf(d.RoundResult.status) != -1) {
+                spanLabel = "Lapped: ";
+                divStatus = "";
+            }
+            var status = ""
+            if (d.RoundResult.status != "Finished") {
+                var status = "<div " + divClass + ">" + iconText + "<span class='labels'> " + spanLabel + " </span><span " + divStatus + ">" + d.RoundResult.status + "</span></div>";
+            }
+            return driver + grid + status + points + position + construct + laps;
         })
 		.attr('class','hidden position '+driverId+" "+HIGHLIGHT_STATUS_CLASSES.plain)
 		.attr('transform',function(d) {
@@ -884,4 +908,56 @@ function addDriversHeaderElements() {
 		.append('tspan')
 		.text('test');
 
+}
+
+function eredita(){
+    var btnclick = d3.select("button.resetAll")
+        .on('click', function() {
+            $("#constructorSelect").val('');
+            $("#exploreSelect").val('');
+            unhighlightAll();
+            viz.selectAll("g.position")
+                .classed('hidden', true);
+            //assegna le classi in base alla selezione
+            viz.selectAll('path.results, g.position, g.driver-element, g.final-position-g, rect.driver-rect')
+                .classed(HIGHLIGHT_STATUS_CLASSES.plain, false)                 // rimuove la classe plain a tutti
+                .classed(HIGHLIGHT_STATUS_CLASSES.dimmed, true);
+            //diminuisce lo stroke dei path dei piloti dimmed
+            viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.dimmed)
+                .attr('stroke-width', PATH_STROKE.dimmed);
+
+            viz.selectAll("g.position circle.position-circle[stroke='yellow']")
+                .attr('r', POSITION_CIRCLES.radius.highlighted);
+
+            viz.selectAll("g.position circle.position-circle[stroke='red']")
+                .attr('r', POSITION_CIRCLES.radius.highlighted);
+            //cambia i colori
+            for (var i in drivers) {
+                //cambia colori position
+                console.log(i)
+                viz.selectAll('g.position.'+drivers[i].driverId+' circle.position-circle, '+
+                'g.position.'+drivers[i].driverId+' path.position-triangle-down, '+
+                'g.position.'+drivers[i].driverId+' path.position-triangle-up')
+                    .style('fill', function(d){
+                        return d3.rgb(SCALES.colorsHighlight(parseInt(drivers[i].position))).darker();
+                    });
+            }
+
+            console.log("ciao")
+            //aumenta il raggio dei position dei piloti highlighted
+            //viz.selectAll("g.position circle.position-circle[stroke='yellow']")
+            //    .attr('r', 100);
+
+            $("circle.position-circle[stroke='yellow']").parent("g.position").removeClass("hidden dimmed-elem");
+            $("path.position-triangle-up[stroke='yellow']").parent("g.position").removeClass("hidden dimmed-elem");
+            $("path.position-triangle-down[stroke='yellow']").parent("g.position").removeClass("hidden dimmed-elem");
+
+            $("circle.position-circle[stroke='red']").parent("g.position").removeClass("hidden dimmed-elem");
+            $("path.position-triangle-up[stroke='red']").parent("g.position").removeClass("hidden dimmed-elem");
+            $("path.position-triangle-down[stroke='red']").parent("g.position").removeClass("hidden dimmed-elem");
+
+            //mostra le posizioni
+            //viz.selectAll("g.position circle.position-circle[stroke='yellow']")
+            //    .classed('hidden', false);
+        });
 }
