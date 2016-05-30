@@ -2,6 +2,7 @@
   "races": [
     {
       "lastFinished": 5,
+      "laps": 58,
       "url": "http://en.wikipedia.org/wiki/2015_Australian_Grand_Prix",
       "season": "2015",
       "raceName": "Australian Grand Prix",
@@ -22,6 +23,7 @@
     },
     {
       "lastFinished": 7,
+      "laps": 56,
       "url": "http://en.wikipedia.org/wiki/2015_Malaysian_Grand_Prix",
       "season": "2015",
       "raceName": "Malaysian Grand Prix",
@@ -42,6 +44,7 @@
     },
     {
       "lastFinished": 9,
+      "laps": 56,
       "url": "http://en.wikipedia.org/wiki/2015_Chinese_Grand_Prix",
       "season": "2015",
       "raceName": "Chinese Grand Prix",
@@ -62,6 +65,7 @@
     },
     {
       "lastFinished": 7,
+      "laps": 57,
       "url": "http://en.wikipedia.org/wiki/2015_Bahrain_Grand_Prix",
       "season": "2015",
       "raceName": "Bahrain Grand Prix",
@@ -82,6 +86,7 @@
     },
     {
       "lastFinished": 6,
+      "laps": 66,
       "url": "http://en.wikipedia.org/wiki/2015_Spanish_Grand_Prix",
       "season": "2015",
       "raceName": "Spanish Grand Prix",
@@ -102,6 +107,7 @@
     },
     {
       "lastFinished": 14,
+      "laps": 78,
       "url": "http://en.wikipedia.org/wiki/2015_Monaco_Grand_Prix",
       "season": "2015",
       "raceName": "Monaco Grand Prix",
@@ -122,6 +128,7 @@
     },
     {
       "lastFinished": 7,
+      "laps": 70,
       "url": "http://en.wikipedia.org/wiki/2015_Canadian_Grand_Prix",
       "season": "2015",
       "raceName": "Canadian Grand Prix",
@@ -142,6 +149,7 @@
     },
     {
       "lastFinished": 6,
+      "laps": 71,
       "url": "http://en.wikipedia.org/wiki/2015_Austrian_Grand_Prix",
       "season": "2015",
       "raceName": "Austrian Grand Prix",
@@ -162,6 +170,7 @@
     },
     {
       "lastFinished": 7,
+      "laps": 52,
       "url": "http://en.wikipedia.org/wiki/2015_British_Grand_Prix",
       "season": "2015",
       "raceName": "British Grand Prix",
@@ -182,6 +191,7 @@
     },
     {
       "lastFinished": 14,
+      "laps": 67,
       "url": "http://en.wikipedia.org/wiki/2015_Hungarian_Grand_Prix",
       "season": "2015",
       "raceName": "Hungarian Grand Prix",
@@ -202,6 +212,7 @@
     },
     {
       "lastFinished": 11,
+      "laps": 44,
       "url": "http://en.wikipedia.org/wiki/2015_Belgian_Grand_Prix",
       "season": "2015",
       "raceName": "Belgian Grand Prix",
@@ -222,6 +233,7 @@
     },
     {
       "lastFinished": 6,
+      "laps": 53,
       "url": "http://en.wikipedia.org/wiki/2015_Italian_Grand_Prix",
       "season": "2015",
       "raceName": "Italian Grand Prix",
@@ -242,6 +254,7 @@
     },
     {
       "lastFinished": 12,
+      "laps": 61,
       "url": "https://en.wikipedia.org/wiki/2015_Singapore_Grand_Prix",
       "season": "2015",
       "raceName": "Singapore Grand Prix",
@@ -262,6 +275,7 @@
     },
     {
       "lastFinished": 9,
+      "laps": 53,
       "url": "https://en.wikipedia.org/wiki/2015_Japanese_Grand_Prix",
       "season": "2015",
       "raceName": "Japanese Grand Prix",
@@ -282,6 +296,7 @@
     },
     {
       "lastFinished": 11,
+      "laps": 53,
       "url": "https://en.wikipedia.org/wiki/2015_Russian_Grand_Prix",
       "season": "2015",
       "raceName": "Russian Grand Prix",
@@ -302,6 +317,7 @@
     },
     {
       "lastFinished": 12,
+      "laps": 56,
       "url": "https://en.wikipedia.org/wiki/2015_United_States_Grand_Prix",
       "season": "2015",
       "raceName": "United States Grand Prix",
@@ -322,6 +338,7 @@
     },
     {
       "lastFinished": 14,
+      "laps": 71,
       "url": "https://en.wikipedia.org/wiki/2015_Mexican_Grand_Prix",
       "season": "2015",
       "raceName": "Mexican Grand Prix",
@@ -342,6 +359,7 @@
     },
     {
       "lastFinished": 4,
+      "laps": 71,
       "url": "https://en.wikipedia.org/wiki/2015_Brazilian_Grand_Prix",
       "season": "2015",
       "raceName": "Brazilian Grand Prix",
@@ -362,6 +380,7 @@
     },
     {
       "lastFinished": 11,
+      "laps": 55,
       "url": "https://en.wikipedia.org/wiki/2015_Abu_Dhabi_Grand_Prix",
       "season": "2015",
       "raceName": "Abu Dhabi Grand Prix",

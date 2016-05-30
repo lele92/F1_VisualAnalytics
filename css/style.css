@@ -282,6 +282,9 @@ span.labels {
 i.fa {
     padding-right: 3px;
 }
+i.gplist, i.pilotlist {
+    padding-right: 10px;
+}
 
 div.modal-header {
     text-align: left;
@@ -297,6 +300,35 @@ div.tooltip-inner {
     border-left-color: #FFFFFF; !important;
 }
 
+.tooltip.left .tooltip-arrow {
+    border-left-color: #FFFFFF; !important;
+}
+
 .product .img-responsive {
     margin: 0 auto;
 }
+
+img.flag {
+    /*vertical-align: middle,*/
+    padding-right: 5px
+}
+
+span.gptitle {
+    vertical-align: middle;
+}
+
+span.red {
+    background-color: red;
+}
+
+span.yellow {
+    background-color: #ffff00;
+}
+
+div.legend + img{
+    padding-left: 50px;
+}
+
+/*#modal-legend-body {*/
+    /*background-color: purple;*/
+/*}*/

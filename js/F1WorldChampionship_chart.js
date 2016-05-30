@@ -205,52 +205,29 @@ function addPositionElements(driverId, driverFinalPosition, res, standings) {
 		.append("g")
         .attr('data-html', 'true')
         .attr('data-toggle', 'tooltip')
-        .attr('data-placement', 'left')
+        .attr('data-placement', 'auto left')
         .attr('data-original-title', function(d) {
             var iconText = "<i class='fa fa-chevron-right'></i>"
-            var driver = "<div class='center'>" + iconText + "<span class='labels'> Driver: </span><span>" + d.RoundResult.Driver.familyName + "</span></div>";
-            var position = "<div class='center'>" + iconText + "<span class='labels'> Final Position: </span><span>" + d.RoundResult.position + "</span></div>";
-            var status = "<div class='center'>" + iconText + "<span class='labels'> Status: </span><span>" + d.RoundResult.status + "</span></div>";
-            var points = "<div class='center'>" + iconText + "<span class='labels'> Gain Point: </span><span>" + d.RoundResult.points + "</span></div>";
-            var grid = "<div class='center'>" + iconText + "<span class='labels'> Start Grid Position: </span><span>" + d.RoundResult.grid + "</span></div>";
-            var construct = "<div class='center'>" + iconText + "<span class='labels'> Construct: </span><span>" + d.RoundResult.Constructor.name + "</span></div>";
-            //var selText = $("<div class='well' class='lbl-panel-span'>"+getSelectionText(note.target.id,note.target.start,note.target.end)+"</div>")
-            //return "ciao bel"
-            return driver + position + status + points + grid + construct;
+            var spanClass = "class='labels'";
+            var divClass = "class='center'";
+            var driver = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Driver: </span><span>" + d.RoundResult.Driver.familyName + "</span></div>";
+            var actualStandings = parseInt(getStandingsPosition(parseInt(d.round)-1, standings, d.RoundResult.Driver.driverId))
+            var position = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Standing position: </span><span>" + actualStandings + "</span></div>";
+            var prevPoint;
+            if (parseInt(d.round)==1)
+                prevPoint = 0;//se è la prima gara ovviamente non ci sono variazioni
+            else
+                prevPoint = parseInt(getStandingsPoint(parseInt(d.round)-2, standings, d.RoundResult.Driver.driverId))
+            if (prevPoint == -1) prevPoint = 0;
 
-            //$("#modal-pilot-header").attr("background-color", function(d) {
-            //        return d3.rgb(SCALES.colors(parseInt(driverFinalPosition))).darker();
-            //    }
-            //);)
-        })
-        //.attr("title", "Hi")
-        .on('click', function(d) {
-            var $modal_body = $("#modal-pilot-body").empty();
-            var iconText = "<i class='fa fa-chevron-right'></i>"
-            var driver = $("<div class='center'>"+iconText+"<span class='labels'> Driver: </span><span>"+ d.RoundResult.Driver.familyName+"</span></div>");
-            var position = $("<div class='center'>"+iconText+"<span class='labels'> Final Position: </span><span>"+ d.RoundResult.position+"</span></div>");
-            var status = $("<div class='center'>"+iconText+"<span class='labels'> Status: </span><span>"+ d.RoundResult.status+"</span></div>");
-            var points = $("<div class='center'>"+iconText+"<span class='labels'> Gain Point: </span><span>"+ d.RoundResult.points+"</span></div>");
-            var grid = $("<div class='center'>"+iconText+"<span class='labels'> Start Grid Position: </span><span>"+d.RoundResult.grid+"</span></div>");
-            var construct = $("<div class='center'>"+iconText+"<span class='labels'> Construct: </span><span>"+d.RoundResult.Constructor.name+"</span></div>");
-            //var selText = $("<div class='well' class='lbl-panel-span'>"+getSelectionText(note.target.id,note.target.start,note.target.end)+"</div>")
-            content = driver + position + status + points + grid + construct
-            $modal_body.append(driver);
-            $modal_body.append(position);
-            $modal_body.append(status);
-            $modal_body.append(points);
-            $modal_body.append(grid);
-            $modal_body.append(construct);
-            d3.select("#modal-pilot-header")
-                .style("background-color", function(d) {
-                    return d3.rgb(SCALES.colorsHighlight(parseInt(driverFinalPosition)));
-                });
-            //$("#modal-pilot-header").attr("background-color", function(d) {
-            //        return d3.rgb(SCALES.colors(parseInt(driverFinalPosition))).darker();
-            //    }
-            //);
-
-            $("#myModal").modal('show');
+            var points = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Points: </span><span>" + prevPoint+" (+"+d.RoundResult.points+")" + "</span></div>";
+            var grid = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Grid Position: </span><span>" + d.RoundResult.grid + "</span></div>";
+            var construct = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Construct: </span><span>" + d.RoundResult.Constructor.name + "</span></div>";
+            var divStatus;
+            if (STATUSES.accident.indexOf(d.RoundResult.status) != -1) divStatus = "class='red'"
+            if (STATUSES.failure.indexOf(d.RoundResult.status) != -1) divStatus = "class='yellow'"
+            var status = "<div "+divClass+">" + iconText + "<span class='labels'> Status: </span><span "+divStatus+">" + d.RoundResult.status + "</span></div>";
+            return driver + grid + status + points + position + construct;
         })
 		.attr('class','hidden position '+driverId+" "+HIGHLIGHT_STATUS_CLASSES.plain)
 		.attr('transform',function(d) {
@@ -481,23 +458,23 @@ function addGPElements() {
         .on('click', function(d) {
             console.log(d)
             var $modal_body = $("#modal-gp-body").empty();
-            var iconText = "<i class='fa fa-chevron-right'></i>";
+            var iconText = "<i class='fa fa-chevron-right gplist'></i>";
             var spanClass = "class='labels'";
             var divClass = "class='gpmodal'";
             var raceName = $("<div "+divClass+">" + iconText + "<span "+spanClass+"'> Race Name: </span><span>" + d.raceName + "</span></div>");
             var circuitName = $("<div "+divClass+">" + iconText + "<span "+spanClass+"> Circuit Name: </span><span>" + d.Circuit.circuitName + "</span></div>");
-            var country = $("<div "+divClass+">" + iconText + "<span "+spanClass+"> Status: </span><span>" + d.Circuit.Location.country + "</span></div>");
-            var location = $("<div "+divClass+">" + iconText + "<span "+spanClass+"> Gain Point: </span><span>" + d.Circuit.Location.locality + "</span></div>");
-            var europeanTime = $("<div "+divClass+">" + iconText + "<span "+spanClass+"> Date: </span><span>" + d.date + "</span></div>");
+            var country = $("<div "+divClass+">" + iconText + "<span "+spanClass+"> Country: </span><span>" + d.Circuit.Location.country + "</span></div>");
+            var location = $("<div "+divClass+">" + iconText + "<span "+spanClass+"> Locality: </span><span>" + d.Circuit.Location.locality + "</span></div>");
+            var laps = $("<div "+divClass+">" + iconText + "<span "+spanClass+"> Number of Laps: </span><span>" + d.laps + "</span></div>");
             var date = $("<div "+divClass+">" + iconText + "<span "+spanClass+"> Date: </span><span>" + d.date + "</span></div>");
-            var linkWikipedia = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Link GP Wikipedia: </span><span><a target='_blank' href='"+ d.url+"' >"+d.raceName+"</a></span></div>");
+            var linkWikipedia = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Other info: </span><span><a target='_blank' href='"+ d.url+"' >"+d.raceName+"</a></span></div>");
             var circuit_image = $("<div><img class='center-block' src='img/gp/"+ d.Circuit.circuitId+".png'></div>");
             //var selText = $("<div class='well' class='lbl-panel-span'>"+getSelectionText(note.target.id,note.target.start,note.target.end)+"</div>")
             $modal_body.append(raceName);
             $modal_body.append(circuitName);
             $modal_body.append(country);
             $modal_body.append(location);
-            $modal_body.append(europeanTime);
+            $modal_body.append(laps);
             $modal_body.append(date);
             $modal_body.append(linkWikipedia);
             $modal_body.append(circuit_image);
@@ -509,7 +486,7 @@ function addGPElements() {
             //        return d3.rgb(SCALES.colors(parseInt(driverFinalPosition))).darker();
             //    }
             //);
-            $("#gpModalTitle").text(d.raceName);
+            $("#gpModalTitle").html("<img class='flag' width='40' src='img/nationGp/"+ d.Circuit.Location.country +".jpg'><span class='gptitle'>"+d.raceName+"</span>");
 
             $("#gpModal").modal('show');
         });
@@ -598,7 +575,7 @@ function addDriversElements() {
         .on('click', function(d) {
             //console.log(d)
             var $modal_body = $("#modal-pilot-body").empty();
-            var iconText = "<i class='fa fa-chevron-right'></i>";
+            var iconText = "<i class='fa fa-chevron-right pilotlist'></i>";
             var spanClass = "class='labels'";
             var divClass = "class='pilotmodal'";
             var container = $("<div class=''></div>");
@@ -616,19 +593,19 @@ function addDriversElements() {
             var familyName = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Family Name: </span><span>"+ d.familyName+"</span></div>");
             var nationality = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Nationality: </span><span>"+ d.nationality+"</span></div>");
             var birth = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Date of Birth: </span><span>"+ d.dateOfBirth+"</span></div>");
-            var finalPosition = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Final Position: </span><span>"+d.position+"</span></div>");
-            var finalPoints = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Points: </span><span>"+d.points+"</span></div>");
+            var finalPosition = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Final Standings Position: </span><span>"+d.position+"</span></div>");
+            var finalPoints = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Total Points: </span><span>"+d.points+"</span></div>");
             var Constructor = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Constructor: </span><span>"+d.Constructor.name+"</span></div>");
-            var permanentNumber = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Permanent Number: </span><span>"+d.permanentNumber+"</span></div>");
-            var linkWikipedia = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Link Wikipedia: </span><span><a target='_blank' href='"+ d.url+"' >"+d.familyName+"</a></span></div>");
+            var permanentNumber = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Car's Number: </span><span>"+d.permanentNumber+"</span></div>");
+            var linkWikipedia = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Other info: </span><span><a target='_blank' href='"+ d.url+"' >"+d.familyName+"</a></span></div>");
             //var selText = $("<div class='well' class='lbl-panel-span'>"+getSelectionText(note.target.id,note.target.start,note.target.end)+"</div>")
             //content = driver + position + status + points + grid + construct
             div_info.append(name);
             div_info.append(familyName);
             div_info.append(nationality);
             div_info.append(birth);
-            div_info.append(finalPosition);
             div_info.append(finalPoints);
+            div_info.append(finalPosition);
             div_info.append(Constructor);
             div_info.append(permanentNumber);
             div_info.append(linkWikipedia);
@@ -638,10 +615,10 @@ function addDriversElements() {
             container.append(container_row);
             $modal_body.append(container);
 
-            d3.select("#modal-pilot-header")
-                .style("background-color", function() {
-                    return d3.rgb(SCALES.colorsHighlight(parseInt(d.position)));
-                });
+            //d3.select("#modal-pilot-header")
+            //    .style("background-color", function() {
+            //        return d3.rgb(SCALES.colorsHighlight(parseInt(d.position)));
+            //    });
 
             $("#pilotModalTitle").text(d.givenName +" "+ d.familyName);
 
