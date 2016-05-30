@@ -166,7 +166,7 @@ g.info-g:hover {
 #exploreSelect {
     display: inline-block;
     width: 150px;
-    height: 34px;
+    height: 30px;
     padding: 0px;
     font-size: 15px;
     line-height: 1;
@@ -209,10 +209,10 @@ g.info-g:hover {
 
 #constructorSelect {
     display: inline-block;
-    width: 300px;
+    width: 150px;
     height: 30px;
     padding: 0px;
-    font-size: 22px;
+    font-size: 15px;
     line-height: 1;
     color: #FFF;
     background-color: #323639;
@@ -223,7 +223,7 @@ g.info-g:hover {
 
 #exploreFormGroup {
     display: inline-block;
-    margin-left: 25px;
+    margin-left: 5px;
 }
 
 #constructorFormGroup {
@@ -235,8 +235,14 @@ g.info-g:hover {
     display: inline-block;
 }
 
-#constructorLbl, #exploreLbl {
+#constructorLbl, #exploreLbl, #finalSentence {
+    font-family: sans-serif;
     font-size: 15px;
+    color: #FFF;
+}
+
+#finalSentence {
+    margin-left: 5px;
 }
 
 #titleDiv {
