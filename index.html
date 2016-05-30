@@ -50,9 +50,8 @@
 
             <span id="finalSentence"> ...or simply click wherever you want and explore ...</span>
 
-            </div>
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#legendModal">Launch demo modal</button>
-            <a id="tutorialBtn" class="glyphicon glyphicon-question-sign" aria-hidden="true" href="http://prezi.com/ffweuujpqodd/?utm_campaign=share&utm_medium=copy&rc=ex0share" target="_blank"></a>
+            <!--<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#legendModal">Launch demo modal</button>-->
+            <a id="tutorialBtn" data-toggle="modal" data-target="#legendModal" class="glyphicon glyphicon-question-sign" aria-hidden="true" ></a>
         </div>
 
         <div  id="chart"></div>
@@ -110,6 +109,8 @@
                     <h4>Position Stroke</h4>
                     <div class="legend"><img src="img/Legend/yellow_stroke.png" alt=""/><span>questo è un cerchio</span></div>
                     <div class="legend"><img src="img/Legend/red_stroke.png" alt=""/><span>questo è un cerchio</span></div>
+
+                    <div class="tutorial"><a aria-hidden="true" href="http://prezi.com/ffweuujpqodd/?utm_campaign=share&utm_medium=copy&rc=ex0share" target="_blank"><i class='fa fa-external-link'></i>Quick Tutorial</a></div>
                 </div>
                 <div class="modal-footer" id="modal-legend-footer">
                     <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>

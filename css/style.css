@@ -329,6 +329,9 @@ div.legend + img{
     padding-left: 50px;
 }
 
+div.tutorial {
+    text-align: center;
+}
 /*#modal-legend-body {*/
     /*background-color: purple;*/
 /*}*/
