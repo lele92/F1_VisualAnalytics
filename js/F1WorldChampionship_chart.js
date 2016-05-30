@@ -222,7 +222,7 @@ function addPositionElements(driverId, driverFinalPosition, res, standings) {
 
             var points = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Points: </span><span>" + prevPoint+" (+"+d.RoundResult.points+")" + "</span></div>";
             var grid = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Grid Position: </span><span>" + d.RoundResult.grid + "</span></div>";
-            var construct = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Construct: </span><span>" + d.RoundResult.Constructor.name + "</span></div>";
+            var construct = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Constructor: </span><span>" + d.RoundResult.Constructor.name + "</span></div>";
             var divStatus;
             if (STATUSES.accident.indexOf(d.RoundResult.status) != -1) divStatus = "class='red'"
             if (STATUSES.failure.indexOf(d.RoundResult.status) != -1) divStatus = "class='yellow'"
