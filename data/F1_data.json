@@ -97,7 +97,7 @@
           "lat": "41.57",
           "country": "Spain",
           "long": "2.26111",
-          "locality": "Montmel\ufffd"
+          "locality": "Montmelò"
         },
         "circuitName": "Circuit de Catalunya"
       },
@@ -351,7 +351,7 @@
           "long": "-99.0907",
           "locality": "Mexico City"
         },
-        "circuitName": "Aut\ufffddromo Hermanos Rodr\ufffdguez"
+        "circuitName": "Autodromo Hermanos Rodriguez"
       },
       "time": "19:00:00Z",
       "date": "2015-11-01",
@@ -370,9 +370,9 @@
           "lat": "-23.7036",
           "country": "Brazil",
           "long": "-46.6997",
-          "locality": "S\ufffdo Paulo"
+          "locality": "Sao Paulo"
         },
-        "circuitName": "Aut\ufffddromo Jos\ufffd Carlos Pace"
+        "circuitName": "Autodromo Josè Carlos Pace"
       },
       "time": "16:00:00Z",
       "date": "2015-11-15",

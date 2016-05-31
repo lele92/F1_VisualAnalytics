@@ -61,7 +61,8 @@ const STATUSES = {
 	'accident': [
 		'Accident',
 		'Collision',
-		'Spun off'
+		'Spun off',
+		'Collision damage'
 	],
     'lapped': [
         '+1 Lap',
@@ -89,7 +90,6 @@ const STATUSES = {
 		'Power loss',
 		'Excluded',
 		'Turbo',
-		'Collision damage',
 		'Power Unit',
 		'ERS',
 		'Brake duct'
@@ -105,6 +105,9 @@ var standings = [];
 var topThree = ['hamilton','rosberg','vettel'];
 var lastThree = ['merhi','rossi','stevens'];
 var rollerCoaster = ['massa'];
+var leastReliableConstructor = 'McLaren';
+var theUnluckiestDriver = ['maldonado']
+var youngDrivers = ['max_verstappen','sainz','kvyat'];
 var constructors = ['Ferrari',
 					'Force India',
 					'Lotus F1',
@@ -148,6 +151,18 @@ $(document).ready(function() {
 			case 'The roller coaster':
 				highlightDrivers(rollerCoaster);
 				break;
+			case 'Young drivers':
+				highlightDrivers(youngDrivers);
+				break;
+			case 'The unluckiest driver':
+				highlightDrivers(theUnluckiestDriver);
+				break;
+			case 'The least reliable constructor':
+				highlightDrivers(findConstructorDrivers(leastReliableConstructor, drivers));;
+				break;
+			case 'Season problems distribution':
+				showSeasonProblemsDistr();
+				break;
 		}
 	});
 
@@ -182,15 +197,14 @@ function buildViz() {
 		addPositionElements(drivers[i].driverId,drivers[i].position,drivers[i].Results, standings);
 	}
 	addDriversHeaderElements();
-
-    eredita()
+	addClearSelctionBtn();
 
 }
 
 function addDriversStandingsRect() {
 	viz.append('rect')
 		.attr('id','driversStandingRect')
-		.attr('height',HEIGHT-10)
+		.attr('height',HEIGHT-33)
 		.attr('width',185)
 		.attr('x','5')
 		.attr('y','3')
@@ -232,11 +246,11 @@ function addPositionElements(driverId, driverFinalPosition, res, standings) {
             var points = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Points: </span><span>" + prevPoint+" (+"+d.RoundResult.points+")" + "</span></div>";
             var grid = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Grid Position: </span><span>" + d.RoundResult.grid + "</span></div>";
             var construct = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Constructor: </span><span>" + d.RoundResult.Constructor.name + "</span></div>";
-            var laps = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Laps: </span><span>" + d.RoundResult.laps + "</span></div>";
+            var laps = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Completed laps: </span><span>" + d.RoundResult.laps + "</span></div>";
             var divStatus = "";
             var spanLabel = "";
             if (STATUSES.accident.indexOf(d.RoundResult.status) != -1) {
-                spanLabel = "Finished with a ";
+                spanLabel = "Final status:";
                 divStatus = "class='red'";
             }
             if (STATUSES.failure.indexOf(d.RoundResult.status) != -1) {
@@ -571,7 +585,8 @@ function addDriversElements() {
 			return 'driver-element '+HIGHLIGHT_STATUS_CLASSES.plain+' '+d.driverId;
 		})
 		.on('click', function(d) {
-			//todo: si può implementare meglio
+			$("#constructorSelect").val('');
+			$("#exploreSelect").val('');
 			var selectedElem = d3.select(this);
 			if(selectedElem.classed(HIGHLIGHT_STATUS_CLASSES.plain) || selectedElem.classed(HIGHLIGHT_STATUS_CLASSES.dimmed)) {
 				highlight(d.driverId, selectedElem);
@@ -910,54 +925,70 @@ function addDriversHeaderElements() {
 
 }
 
-function eredita(){
-    var btnclick = d3.select("button.resetAll")
-        .on('click', function() {
-            $("#constructorSelect").val('');
-            $("#exploreSelect").val('');
-            unhighlightAll();
-            viz.selectAll("g.position")
-                .classed('hidden', true);
-            //assegna le classi in base alla selezione
-            viz.selectAll('path.results, g.position, g.driver-element, g.final-position-g, rect.driver-rect')
-                .classed(HIGHLIGHT_STATUS_CLASSES.plain, false)                 // rimuove la classe plain a tutti
-                .classed(HIGHLIGHT_STATUS_CLASSES.dimmed, true);
-            //diminuisce lo stroke dei path dei piloti dimmed
-            viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.dimmed)
-                .attr('stroke-width', PATH_STROKE.dimmed);
+function addClearSelctionBtn() {
+	rectHeight = DRIVER_RECT.rectHeight-2;
+	viz.append('g')
+		.attr('id','clearSelectionG')
+		.attr("transform", "translate(10,"+ (HEIGHT-25) +")")
+		.on('click', function(d) {
+			$("#constructorSelect").val('');
+			$("#exploreSelect").val('');
+			unhighlightAll();
+		});
 
-            viz.selectAll("g.position circle.position-circle[stroke='yellow']")
-                .attr('r', POSITION_CIRCLES.radius.highlighted);
+	viz.select('g#clearSelectionG')
+		.append('rect')
+		.attr('id','clearSelectionBtn')
+		.attr("rx","0")
+		.attr("ry","15")
+		.attr("height", rectHeight)
+		.attr("width", '175');
 
-            viz.selectAll("g.position circle.position-circle[stroke='red']")
-                .attr('r', POSITION_CIRCLES.radius.highlighted);
-            //cambia i colori
-            for (var i in drivers) {
-                //cambia colori position
-                console.log(i)
-                viz.selectAll('g.position.'+drivers[i].driverId+' circle.position-circle, '+
-                'g.position.'+drivers[i].driverId+' path.position-triangle-down, '+
-                'g.position.'+drivers[i].driverId+' path.position-triangle-up')
-                    .style('fill', function(d){
-                        return d3.rgb(SCALES.colorsHighlight(parseInt(drivers[i].position))).darker();
-                    });
-            }
+	viz.select('g#clearSelectionG')
+		.append('text')
+		.attr('id','clearBtnLbl')
+		.attr('text-anchor', 'middle')
+		.attr('dominant-baseline', 'central')
+		.attr('y', rectHeight/2)
+		.attr('x', (175/2))
+		.text('Clear selection')
+		// .style('fill', );
 
-            console.log("ciao")
-            //aumenta il raggio dei position dei piloti highlighted
-            //viz.selectAll("g.position circle.position-circle[stroke='yellow']")
-            //    .attr('r', 100);
+}
 
-            $("circle.position-circle[stroke='yellow']").parent("g.position").removeClass("hidden dimmed-elem");
-            $("path.position-triangle-up[stroke='yellow']").parent("g.position").removeClass("hidden dimmed-elem");
-            $("path.position-triangle-down[stroke='yellow']").parent("g.position").removeClass("hidden dimmed-elem");
+function showSeasonProblemsDistr(){
+	$("#constructorSelect").val('');
+	unhighlightAll();
+	viz.selectAll("g.position")
+		.classed('hidden', true);
+	//assegna le classi in base alla selezione
+	viz.selectAll('path.results, g.position, g.driver-element, g.final-position-g, rect.driver-rect')
+		.classed(HIGHLIGHT_STATUS_CLASSES.plain, false)                 // rimuove la classe plain a tutti
+		.classed(HIGHLIGHT_STATUS_CLASSES.dimmed, true);
+	//diminuisce lo stroke dei path dei piloti dimmed
+	viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.dimmed)
+		.attr('stroke-width', PATH_STROKE.dimmed);
 
-            $("circle.position-circle[stroke='red']").parent("g.position").removeClass("hidden dimmed-elem");
-            $("path.position-triangle-up[stroke='red']").parent("g.position").removeClass("hidden dimmed-elem");
-            $("path.position-triangle-down[stroke='red']").parent("g.position").removeClass("hidden dimmed-elem");
+	viz.selectAll("g.position circle.position-circle[stroke='yellow']")
+		.attr('r', POSITION_CIRCLES.radius.highlighted);
 
-            //mostra le posizioni
-            //viz.selectAll("g.position circle.position-circle[stroke='yellow']")
-            //    .classed('hidden', false);
-        });
+	viz.selectAll("g.position circle.position-circle[stroke='red']")
+		.attr('r', POSITION_CIRCLES.radius.highlighted);
+	//cambia i colori
+	for (var i in drivers) {
+		//cambia colori position
+		console.log(i)
+		viz.selectAll('g.position.'+drivers[i].driverId+' circle.position-circle, '+
+			'g.position.'+drivers[i].driverId+' path.position-triangle-down, '+
+			'g.position.'+drivers[i].driverId+' path.position-triangle-up')
+			.style('fill', 'grey');
+	}
+
+	$("circle.position-circle[stroke='yellow']").parent("g.position").removeClass("hidden dimmed-elem");
+	$("path.position-triangle-up[stroke='yellow']").parent("g.position").removeClass("hidden dimmed-elem");
+	$("path.position-triangle-down[stroke='yellow']").parent("g.position").removeClass("hidden dimmed-elem");
+
+	$("circle.position-circle[stroke='red']").parent("g.position").removeClass("hidden dimmed-elem");
+	$("path.position-triangle-up[stroke='red']").parent("g.position").removeClass("hidden dimmed-elem");
+	$("path.position-triangle-down[stroke='red']").parent("g.position").removeClass("hidden dimmed-elem");
 }

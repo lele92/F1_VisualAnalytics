@@ -165,7 +165,7 @@ g.info-g:hover {
 
 #exploreSelect {
     display: inline-block;
-    width: 150px;
+    width: 220px;
     height: 30px;
     padding: 0px;
     font-size: 15px;
@@ -228,7 +228,7 @@ g.info-g:hover {
 
 #constructorFormGroup {
     display: inline-block;
-    margin-left: 20px;
+    margin-left: 10px;
 }
 
 #constructorSelectDiv {
@@ -339,6 +339,32 @@ div.legend + img{
 
 div.tutorial {
     text-align: center;
+}
+
+#clearSelectionBtn {
+    fill: #656E75;
+    fill-opacity: 0.0;
+    stroke: #656E75;
+    stroke-width: 2px;
+}
+
+#clearSelectionG:hover {
+    cursor: pointer;
+}
+
+#clearSelectionG:hover #clearSelectionBtn {
+    stroke: white;
+    fill-opacity: 0.6;
+}
+
+#clearSelectionG:hover #clearBtnLbl {
+    fill: white;
+}
+
+#clearBtnLbl {
+    fill: #656E75;
+    font-family: sans-serif;
+    font-size:  17px;
 }
 /*#modal-legend-body {*/
     /*background-color: purple;*/
