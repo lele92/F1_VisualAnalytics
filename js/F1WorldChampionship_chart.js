@@ -28,6 +28,19 @@ const POSITION_CIRCLES = {
 	}
 };
 
+const PROBLEM_CIRCLES = {
+    'radius': {
+        'plain': 0,
+        'highlighted':24,
+        'dimmed': 0,
+        'mouseover': 30
+    },
+    'stroke': {
+        'plain': 0,
+        'withStatus': 5
+    }
+};
+
 const TRIANGLES = {
 	'area': 900
 }
@@ -46,7 +59,8 @@ const GP_PATH = {
 const PATH_STROKE = {
 	'plain': 8,
 	'highlighted': 12,
-	'dimmed': 2
+	'dimmed': 2,
+    'invisible': 0
 };
 
 const HIGHLIGHT_STATUS_CLASSES = {
@@ -106,18 +120,18 @@ var topThree = ['hamilton','rosberg','vettel'];
 var lastThree = ['merhi','rossi','stevens'];
 var rollerCoaster = ['massa'];
 var leastReliableConstructor = 'McLaren';
-var theUnluckiestDriver = ['maldonado']
+var theUnluckiestDriver = ['maldonado'];
 var youngDrivers = ['max_verstappen','sainz','kvyat'];
-var constructors = ['Ferrari',
+var constructors = ['Mercedes',
+                    'Ferrari',
+                    'Williams',
+					'Red Bull',
 					'Force India',
 					'Lotus F1',
-					'Manor Marussia',
-					'McLaren',
-					'Mercedes',
-					'Red Bull',
-					'Sauber',
 					'Toro Rosso',
-					'Williams'];
+					'Sauber',
+					'McLaren',
+					'Manor Marussia'];
 
 window.onload = function() {
 
@@ -161,7 +175,8 @@ $(document).ready(function() {
 				highlightDrivers(findConstructorDrivers(leastReliableConstructor, drivers));;
 				break;
 			case 'Season problems distribution':
-				showSeasonProblemsDistr();
+				//showSeasonProblemsDistr();
+                showSeasonProblemsDistrNEW();
 				break;
 		}
 	});
@@ -196,6 +211,11 @@ function buildViz() {
 	for (var i in drivers) {
 		addPositionElements(drivers[i].driverId,drivers[i].position,drivers[i].Results, standings);
 	}
+
+    for (var i in races) {
+        addProblemElements(races[i].Circuit.circuitId, races[i].Problems);
+    }
+
 	addDriversHeaderElements();
 	addClearSelctionBtn();
 
@@ -394,6 +414,90 @@ function addPositionElements(driverId, driverFinalPosition, res, standings) {
 
 }
 
+function addProblemElements(circuitId, res) {
+    viz.selectAll("g.problem."+circuitId+"."+HIGHLIGHT_STATUS_CLASSES.plain)
+        .data(res)
+        .enter()
+        .append("g")
+        .attr('data-html', 'true')
+        .attr('data-toggle', 'tooltip')
+        .attr('data-placement', 'auto left')
+        .attr('data-original-title', function(d) {
+            var iconText = "<i class='fa fa-chevron-right'></i>"
+            var spanClass = "class='labels'";
+            var divClass = "class='center'";
+            var driver = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Driver: </span><span>" + d.RoundResult.Driver.familyName + "</span></div>";
+            var position = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Position: </span><span>" + d.RoundResult.position + "</span></div>";
+            var grid = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Grid Position: </span><span>" + d.RoundResult.grid + "</span></div>";
+            var construct = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Constructor: </span><span>" + d.RoundResult.Constructor.name + "</span></div>";
+            var laps = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Completed laps: </span><span>" + d.RoundResult.laps + "</span></div>";
+            var divStatus = "";
+            var spanLabel = "";
+            if (STATUSES.accident.indexOf(d.RoundResult.status) != -1) {
+                spanLabel = "Final status:";
+                divStatus = "class='red'";
+            }
+            if (STATUSES.failure.indexOf(d.RoundResult.status) != -1) {
+                spanLabel = "Failure: ";
+                divStatus = "class='yellow'";
+            }
+            if (STATUSES.lapped.indexOf(d.RoundResult.status) != -1) {
+                spanLabel = "Lapped: ";
+                divStatus = "";
+            }
+            var status = ""
+            if (d.RoundResult.status != "Finished") {
+                var status = "<div " + divClass + ">" + iconText + "<span class='labels'> " + spanLabel + " </span><span " + divStatus + ">" + d.RoundResult.status + "</span></div>";
+            }
+            return driver + position + grid + status + construct + laps;
+        })
+        .attr('class','hidden problem '+circuitId+" "+HIGHLIGHT_STATUS_CLASSES.plain)
+        .attr('transform',function(d) {
+            return "translate("+SCALES.xGPs(parseInt(d.round))+","+SCALES.y(parseInt(d.RoundResult.problemPosition))+")";
+        })
+        .on('mouseenter', function(d) {
+            d3.select($(this).children('circle.position-circle').get(0)).attr('r', PROBLEM_CIRCLES.radius.mouseover)        //un bel magheggio, converto prima i noggetto jquery per prendermi i figli, poi in semplice oggetto dom da passare alla select... jquery magic
+            d3.select($(this).children('text.position-text').get(0)).style('font-size','x-large')
+        })
+        .on('mouseleave', function(d) {
+            d3.select($(this).children('circle.position-circle').get(0)).attr('r', PROBLEM_CIRCLES.radius.highlighted)
+            d3.select($(this).children('text.position-text').get(0)).style('font-size','15px')
+        });
+
+    viz.selectAll("g.problem."+circuitId)
+        .append("circle")
+        .attr('class','position-circle')
+        .attr('r', PROBLEM_CIRCLES.radius.highlighted)
+        .attr('stroke-width', PROBLEM_CIRCLES.stroke.plain);
+
+    viz.selectAll("g.problem."+circuitId)
+        .append('text')
+        .attr('class','position-text')
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .text(function(d) {
+            return d.RoundResult.Driver.code;
+        });
+
+    viz.selectAll("g.problem."+circuitId+" > .position-circle")
+        .style('fill', 'grey')
+        .filter(function(d) {
+            // console.log(d.RoundResult.status)
+            return d.RoundResult.status != "Finished";
+        })
+        .attr("stroke", function(d) {
+            if (STATUSES.accident.indexOf(d.RoundResult.status) != -1) return 'red'
+            if (STATUSES.failure.indexOf(d.RoundResult.status) != -1) return 'yellow'
+        })
+        .attr("stroke-width", function(d) {
+            return PROBLEM_CIRCLES.stroke.withStatus;
+        })
+    // .attr("stroke-dasharray","5,2");
+    //viz.selectAll('g.problem')
+    //    .classed('hidden', false);
+
+}
+
 function addDriverResultsPath() {
 	viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.plain)
 		.data(drivers)
@@ -474,6 +578,23 @@ function addLightTickLines() {
 		.attr('y2', function(d) {
 			return SCALES.y(d.lastFinished+0.5);
 		})
+
+    // Inserimento numeri per piloti non doppiati
+    //viz.selectAll('g.lapped')
+    //    .data(races)
+    //    .enter()
+    //    .append("g")
+    //    .attr('class','lapped')
+    //    .attr('transform',function(d) {
+    //        return "translate("+SCALES.xGPs((d.round))+","+SCALES.y((parseFloat(d.lastFinished)/2)+0.5)+")";
+    //    })
+    //    .append('text')
+    //    .attr('class','lapped-text')
+    //    .attr('text-anchor', 'middle')
+    //    .attr('dominant-baseline', 'central')
+    //    .text(function(d) {
+    //        return d.lastFinished;
+    //    });
 }
 
 function addGPElements() {
@@ -748,7 +869,7 @@ function confScales() {
 //todo: sicuramente ci sono modi più efficienti di farlo, ma avendo a che fare con pochi elementi (circa 20 piloti, 20 gp, etc...) usare dei cicli e fare diversi selectAll non è un grosso problema e non si perde molto
 function highlight(dId) {
 	//todo: da rivedere e migliorare
-
+    reselectPathAndUnhighlightProblem();
 
 	//assegna le classi in base alla selezione
 	viz.selectAll('path.results, g.position, g.driver-element, g.final-position-g, rect.driver-rect')
@@ -933,6 +1054,7 @@ function addClearSelctionBtn() {
 		.on('click', function(d) {
 			$("#constructorSelect").val('');
 			$("#exploreSelect").val('');
+            reselectPathAndUnhighlightProblem();
 			unhighlightAll();
 		});
 
@@ -991,4 +1113,31 @@ function showSeasonProblemsDistr(){
 	$("circle.position-circle[stroke='red']").parent("g.position").removeClass("hidden dimmed-elem");
 	$("path.position-triangle-up[stroke='red']").parent("g.position").removeClass("hidden dimmed-elem");
 	$("path.position-triangle-down[stroke='red']").parent("g.position").removeClass("hidden dimmed-elem");
+}
+
+function showSeasonProblemsDistrNEW(){
+    $("#constructorSelect").val('');
+    unhighlightAll();
+    //assegna le classi in base alla selezione
+    viz.selectAll('path.results, g.position, g.driver-element, g.final-position-g, rect.driver-rect')
+        .classed(HIGHLIGHT_STATUS_CLASSES.plain, false)                 // rimuove la classe plain a tutti
+        .classed(HIGHLIGHT_STATUS_CLASSES.dimmed, true);
+    //diminuisce lo stroke dei path dei piloti dimmed
+    viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.dimmed)
+        .attr('stroke-width', PATH_STROKE.invisible)
+        .classed('hidden', true);
+
+    viz.selectAll('g.problem')
+        .classed('hidden', false);
+
+}
+
+function reselectPathAndUnhighlightProblem(){
+
+    viz.selectAll('g.problem')
+        .classed('hidden', true);
+
+    viz.selectAll('path.results')
+        .classed('hidden', false);
+
 }

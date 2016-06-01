@@ -50,6 +50,19 @@ g > .position-text {
     font-size: 15px;
 }
 
+g > .lapped-text {
+    fill: black;
+    font-weight: bold;
+    font-size: 25px;
+    opacity: 0.9;
+}
+
+g > .problem-text {
+    fill: #323639;
+    font-weight: bold;
+    font-size: 15px;
+}
+
 .driver-path-elem {
     opacity:1;
     fill:#0000ff;
@@ -79,6 +92,10 @@ g.driver-element:hover{
 }
 
 g.position:hover {
+    cursor: pointer;
+}
+
+g.problem:hover {
     cursor: pointer;
 }
 
