@@ -859,7 +859,7 @@ function confScales() {
 		.range([INSETS.top, HEIGHT - INSETS.bottom]);
 
 	SCALES.colors = d3.scale.linear().domain([1,(drivers.length-1)/2,drivers.length-1]).range(['#009933','#FFFFFF', '#ff3333']).interpolate(d3.interpolateRgb);
-	//SCALES.colorsHighlight = d3.scale.category20();    //todo: cambiare colori
+	//SCALES.colorsHighlight = d3.scale.category20();   
 	SCALES.colorsHighlight = [
 		'#17becf', // mercedes
 		'#9edae5',
@@ -885,7 +885,6 @@ function confScales() {
 	]
 }
 
-//todo: sicuramente ci sono modi più efficienti di farlo, ma avendo a che fare con pochi elementi (circa 20 piloti, 20 gp, etc...) usare dei cicli e fare diversi selectAll non è un grosso problema e non si perde molto
 function highlight(dId) {
     reselectPathAndUnhighlightProblem();
 

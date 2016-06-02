@@ -45,7 +45,7 @@ function getStandingsPosition(round, standings, driverId) {
 	if (standings[round][driverId]) {       //c'è da fare questo controllo perchè in alcuni gp il pilota potrebbe non aver partecipato
 		return standings[round][driverId].positionText;
 	} else {
-		return -1;  //todo: valutare un altro valore
+		return -1;  
 	}
 }
 
@@ -53,7 +53,7 @@ function getStandingsPoint(round, standings, driverId) {
     if (standings[round][driverId]) {       //c'è da fare questo controllo perchè in alcuni gp il pilota potrebbe non aver partecipato
         return standings[round][driverId].points;
     } else {
-        return -1;  //todo: valutare un altro valore
+        return -1; 
     }
 
 }
