@@ -415,7 +415,7 @@ function addPositionElements(driverId, driverFinalPosition, res, standings) {
 }
 
 function addProblemElements(circuitId, res) {
-    viz.selectAll("g.problem."+circuitId+"."+HIGHLIGHT_STATUS_CLASSES.plain)
+    var gproblem = viz.selectAll("g.problem."+circuitId+"."+HIGHLIGHT_STATUS_CLASSES.plain)
         .data(res)
         .enter()
         .append("g")
@@ -464,14 +464,14 @@ function addProblemElements(circuitId, res) {
             d3.select($(this).children('text.position-text').get(0)).style('font-size','15px')
         });
 
-    viz.selectAll("g.problem."+circuitId)
-        .append("circle")
+    //viz.selectAll("g.problem."+circuitId)
+    var circle = gproblem.append("circle")
         .attr('class','position-circle')
         .attr('r', PROBLEM_CIRCLES.radius.highlighted)
         .attr('stroke-width', PROBLEM_CIRCLES.stroke.plain);
 
-    viz.selectAll("g.problem."+circuitId)
-        .append('text')
+    //viz.selectAll("g.problem."+circuitId)
+    gproblem.append('text')
         .attr('class','position-text')
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'central')
@@ -479,8 +479,8 @@ function addProblemElements(circuitId, res) {
             return d.RoundResult.Driver.code;
         });
 
-    viz.selectAll("g.problem."+circuitId+" > .position-circle")
-        .style('fill', 'grey')
+    //viz.selectAll("g.problem."+circuitId+" > .position-circle")
+    circle.style('fill', 'grey')
         .filter(function(d) {
             // console.log(d.RoundResult.status)
             return d.RoundResult.status != "Finished";
@@ -1130,6 +1130,9 @@ function showSeasonProblemsDistrNEW(){
     viz.selectAll('g.problem')
         .classed('hidden', false);
 
+    viz.selectAll('line.tickline-light')
+        .classed('hidden', true);
+
 }
 
 function reselectPathAndUnhighlightProblem(){
@@ -1138,6 +1141,9 @@ function reselectPathAndUnhighlightProblem(){
         .classed('hidden', true);
 
     viz.selectAll('path.results')
+        .classed('hidden', false);
+
+    viz.selectAll('line.tickline-light')
         .classed('hidden', false);
 
 }
