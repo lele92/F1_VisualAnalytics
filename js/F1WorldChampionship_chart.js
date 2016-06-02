@@ -255,7 +255,7 @@ function addPositionElements(driverId, driverFinalPosition, res, standings) {
             var divClass = "class='center'";
             var driver = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Driver: </span><span>" + d.RoundResult.Driver.familyName + "</span></div>";
             var actualStandings = parseInt(getStandingsPosition(parseInt(d.round)-1, standings, d.RoundResult.Driver.driverId))
-            var position = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Standing position: </span><span>" + actualStandings + "</span></div>";
+            var position = "<div "+divClass+">" + iconText + "<span "+spanClass+"> Partial standing: </span><span>" + actualStandings + "</span></div>";
             var prevPoint;
             if (parseInt(d.round)==1)
                 prevPoint = 0;//se è la prima gara ovviamente non ci sono variazioni
@@ -479,8 +479,7 @@ function addProblemElements(circuitId, res) {
             return d.RoundResult.Driver.code;
         });
 
-    //viz.selectAll("g.problem."+circuitId+" > .position-circle")
-    circle.style('fill', 'grey')
+   circle.style('fill', '#3b4044')
         .filter(function(d) {
             // console.log(d.RoundResult.status)
             return d.RoundResult.status != "Finished";
@@ -743,9 +742,9 @@ function addDriversElements() {
             var div_images = $("<div id="+d.driverId+"_photo"+" class='col-md-6 div_pilot_image'></div>");
             var div_info = $("<div id="+d.driverId+"_info"+" class='col-md-6 div_pilot_info'></div>");
 
-            var row_pilot_image = $("<div class='row'><div class='col-md-12 name centered'><img width='200' class='center-block' src='img/Pilot/"+ d.driverId+".png'></div></div>");
+            var row_pilot_image = $("<div class='row'><div class='col-md-12 name centered'><img width='200' class='center-block driver-img' src='img/Pilot/"+ d.driverId+".png'></div></div>");
             var row_constructor_image = $("<div class='row'><div class='col-md-12 name centered'>" +
-            "<img class='center-block' style='max-width:200px' src='img/Constructor/"+ d.Constructor.constructorId+".png'></div></div>");
+            "<img class='center-block constructor-img' style='max-width:200px' src='img/Constructor/"+ d.Constructor.constructorId+".png'></div></div>");
             div_images.append(row_pilot_image);
             div_images.append(row_constructor_image);
 
@@ -756,7 +755,7 @@ function addDriversElements() {
             var finalPosition = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Final Standings Position: </span><span>"+d.position+"</span></div>");
             var finalPoints = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Total Points: </span><span>"+d.points+"</span></div>");
             var Constructor = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Constructor: </span><span>"+d.Constructor.name+"</span></div>");
-            var permanentNumber = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Car's Number: </span><span>"+d.permanentNumber+"</span></div>");
+            var permanentNumber = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Car Number: </span><span>"+d.permanentNumber+"</span></div>");
             var linkWikipedia = $("<div "+divClass+">"+iconText+"<span "+spanClass+" > Other info: </span><span><a target='_blank' href='"+ d.url+"' >"+d.familyName+"</a></span></div>");
             //var selText = $("<div class='well' class='lbl-panel-span'>"+getSelectionText(note.target.id,note.target.start,note.target.end)+"</div>")
             //content = driver + position + status + points + grid + construct
@@ -855,7 +854,7 @@ function addDriversElements() {
 
 function confScales() {
 	SCALES.xGPs = d3.scale.linear()
-		.domain([1,19.5])//todo: da cambiare: il range del dominio deve essere [round minimo, round massimo]
+		.domain([1,19.5])
 		.range([DRIVERS_X,WIDTH - INSETS.right]);
 
 	SCALES.y = d3.scale.linear()
@@ -863,7 +862,7 @@ function confScales() {
 		.range([INSETS.top, HEIGHT - INSETS.bottom]); //todo: da migliorare
 
 	SCALES.colors = d3.scale.linear().domain([1,(drivers.length-1)/2,drivers.length-1]).range(['#009933','#FFFFFF', '#ff3333']).interpolate(d3.interpolateRgb);
-	SCALES.colorsHighlight = d3.scale.category20();
+	SCALES.colorsHighlight = d3.scale.category20();    //todo: cambiare colori
 }
 
 //todo: sicuramente ci sono modi più efficienti di farlo, ma avendo a che fare con pochi elementi (circa 20 piloti, 20 gp, etc...) usare dei cicli e fare diversi selectAll non è un grosso problema e non si perde molto
@@ -892,6 +891,10 @@ function highlight(dId) {
 			console.log(d.position)
 			return SCALES.colorsHighlight(parseInt(d.position))
 		});
+
+	//cambia colore driver label
+	viz.selectAll('g.driver-element.'+HIGHLIGHT_STATUS_CLASSES.highlighted+' .driver-label')
+		.attr('fill', 'white');
 
 	// //diminuisce il raggio dei position dei piloti dimmed
 	// viz.selectAll('g.position.'+HIGHLIGHT_STATUS_CLASSES.dimmed+' circle.position-circle')
@@ -970,6 +973,10 @@ function unhighlight(dId) {
 			.style('fill', function(d){
 				return SCALES.colors(parseInt(d.position));
 			})
+
+		//cambia colore driver label
+		viz.selectAll('g.driver-element.'+HIGHLIGHT_STATUS_CLASSES.dimmed+' .driver-label')
+			.attr('fill', '#323639');
 	} else {
 		unhighlightAll()
 	}
@@ -1006,6 +1013,10 @@ function unhighlightAll() {
 		.style('fill', function(d){
 			return SCALES.colors(parseInt(d.position));
 		})
+
+	//cambia colore driver label
+	viz.selectAll('g .driver-label')
+		.attr('fill', '#323639');
 }
 
 function highlightDrivers(driversList) {
@@ -1047,7 +1058,7 @@ function addDriversHeaderElements() {
 }
 
 function addClearSelctionBtn() {
-	rectHeight = DRIVER_RECT.rectHeight-2;
+	rectHeight = DRIVER_RECT.rectHeight-6;
 	viz.append('g')
 		.attr('id','clearSelectionG')
 		.attr("transform", "translate(10,"+ (HEIGHT-25) +")")
@@ -1062,7 +1073,7 @@ function addClearSelctionBtn() {
 		.append('rect')
 		.attr('id','clearSelectionBtn')
 		.attr("rx","0")
-		.attr("ry","15")
+		.attr("ry","10")
 		.attr("height", rectHeight)
 		.attr("width", '175');
 
@@ -1103,7 +1114,7 @@ function showSeasonProblemsDistr(){
 		viz.selectAll('g.position.'+drivers[i].driverId+' circle.position-circle, '+
 			'g.position.'+drivers[i].driverId+' path.position-triangle-down, '+
 			'g.position.'+drivers[i].driverId+' path.position-triangle-up')
-			.style('fill', 'grey');
+			.style('fill', '#3b4044');
 	}
 
 	$("circle.position-circle[stroke='yellow']").parent("g.position").removeClass("hidden dimmed-elem");

@@ -30,7 +30,6 @@ rect.gp-rect {
 
 text.driver-label {
     dominant-baseline: middle;
-    fill: #323639;
     font-family: sans-serif;
     font-weight: bold;
 }
@@ -45,7 +44,7 @@ path.results{
 }
 
 g > .position-text {
-    fill: #323639;
+    fill: white;
     font-weight: bold;
     font-size: 15px;
 }
@@ -143,6 +142,8 @@ footer {
     background-color: #323639;
     color: #656E75;
     font-size: 15px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 footer span {
@@ -335,7 +336,10 @@ div.tooltip-inner {
 
 img.flag {
     /*vertical-align: middle,*/
-    padding-right: 5px
+    margin-right: 5px;
+    -webkit-box-shadow: 0px 0px 15px 0px rgba(143,143,143,1);
+    -moz-box-shadow: 0px 0px 15px 0px rgba(143,143,143,1);
+    box-shadow: 0px 0px 15px 0px rgba(143,143,143,1);
 }
 
 span.gptitle {
@@ -354,8 +358,10 @@ div.legend + img{
     padding-left: 50px;
 }
 
-div.tutorial {
+div#tutorial {
+    padding: 10px;
     text-align: center;
+    font-size: 25px;
 }
 
 #clearSelectionBtn {
@@ -383,6 +389,27 @@ div.tutorial {
     font-family: sans-serif;
     font-size:  17px;
 }
-/*#modal-legend-body {*/
-    /*background-color: purple;*/
-/*}*/
+
+#modal-legend-body {
+    background-color: rgb(167, 195, 226);
+}
+
+.legend img {
+    width: 45px;
+    padding: 5px;
+}
+
+#modal-legend-header h3{
+    text-align: center !important;
+}
+
+img.driver-img {
+    -webkit-box-shadow: 0px 0px 37px 0px rgba(143,143,143,1);
+    -moz-box-shadow: 0px 0px 37px 0px rgba(143,143,143,1);
+    box-shadow: 0px 0px 37px 0px rgba(143,143,143,1);
+}
+
+img.constructor-img {
+    margin-top: 30px;
+}
+
