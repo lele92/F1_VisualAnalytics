@@ -42,18 +42,18 @@ const PROBLEM_CIRCLES = {
 
 const TRIANGLES = {
 	'area': 900
-}
+};
 
 const DRIVER_RECT = {
 	'rectHeight': 30,
 	'rectWidth': 130
-}
+};
 
 const GP_PATH = {
 	'rectHeight': 25,
 	'rectWidth': 120,
 	'delta':20
-}
+};
 
 const PATH_STROKE = {
 	'plain': 8,
@@ -107,7 +107,7 @@ const STATUSES = {
 		'ERS',
 		'Brake duct'
 	]
-}
+};
 
 var viz;
 var races = [];
@@ -188,6 +188,7 @@ $(document).ready(function() {
 	});
 });
 
+// funzione principale: configura le scale, aggiunge l'SVG comntainer e invoca tutte le altre funzioni che aggiungono elementi grafici e bottoni
 function buildViz() {
 	confScales();
 
@@ -198,7 +199,6 @@ function buildViz() {
 		.attr('viewBox', '0 0 '+WIDTH+' '+HEIGHT)
 		// .attr('preserveAspectRatio','none')
 
-	// addTopLine(viz)
 	addDriversStandingsRect();
 	addTickLines();
 	addLightTickLines();
@@ -218,6 +218,7 @@ function buildViz() {
 
 }
 
+// rettangolo container per i piloti
 function addDriversStandingsRect() {
 	viz.append('rect')
 		.attr('id','driversStandingRect')
@@ -229,6 +230,7 @@ function addDriversStandingsRect() {
 		.attr('rx','10')
 }
 
+// tutte le posizioni (cerchi e triangoli)
 function addPositionElements(driverId, driverFinalPosition, res, standings) {
 	var gPositions = viz.selectAll("g.position."+driverId+"."+HIGHLIGHT_STATUS_CLASSES.plain)
 		.data(res)
@@ -400,6 +402,7 @@ function addPositionElements(driverId, driverFinalPosition, res, standings) {
 
 }
 
+// gli elementi relativi ai problemi verificatisi in ogni GP
 function addProblemElements(circuitId, res) {
     var gproblem = viz.selectAll("g.problem."+circuitId+"."+HIGHLIGHT_STATUS_CLASSES.plain)
         .data(res)
@@ -482,6 +485,7 @@ function addProblemElements(circuitId, res) {
 
 }
 
+// i path dei singoli driver
 function addDriverResultsPath() {
 	viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.plain)
 		.data(drivers)
@@ -520,6 +524,7 @@ function addDriverResultsPath() {
 		})
 }
 
+// tickline collocate in corrispondenza dei GP
 function addTickLines() {
 	viz.selectAll('line.tickline')
 		.data(races)
@@ -541,6 +546,7 @@ function addTickLines() {
 		})
 }
 
+// parte dei tickline corrispondente ai position dei piloti non lapped
 function addLightTickLines() {
 	viz.selectAll('line.tickline-light')
 		.data(races)
@@ -579,6 +585,7 @@ function addLightTickLines() {
     //    });
 }
 
+// elementi GP sull'asse X
 function addGPElements() {
 	var gGpElements = viz.selectAll("g.gp-element")
 		.data(races)
@@ -656,6 +663,7 @@ function addGPElements() {
 		})
 }
 
+// elementi Driver sull'asse Y
 function addDriversElements() {
 	var gDriverElements = viz.selectAll("g.driver-element."+HIGHLIGHT_STATUS_CLASSES.plain)
 		.data(drivers)
@@ -814,6 +822,7 @@ function addDriversElements() {
 		});
 }
 
+// per configurare le scales
 function confScales() {
 	SCALES.xGPs = d3.scale.linear()
 		.domain([1,19.5])
@@ -850,6 +859,7 @@ function confScales() {
 	]
 }
 
+// per selezionare ed evidenziare un pilota
 function highlight(dId) {
     reselectPathAndUnhighlightProblem();
 
@@ -911,6 +921,7 @@ function highlight(dId) {
 		});
 }
 
+// per deselezionare un pilota evidenziato
 function unhighlight(dId) {
 	var lastOneHighlighted = viz.selectAll('g.driver-element.'+HIGHLIGHT_STATUS_CLASSES.highlighted)[0].length == 1 //se c'è almeno un altro pilota selezionato
 
@@ -964,6 +975,7 @@ function unhighlight(dId) {
 	}
 }
 
+// per deselezionare tutti i piloti selezionati
 function unhighlightAll() {
 	viz.selectAll('path.results, g.position, g.driver-element, .position-text, g.final-position-g, rect.driver-rect')     //li prendo tutti per ripristinare lo stato iniziale
 		.classed(HIGHLIGHT_STATUS_CLASSES.highlighted, false)
@@ -1001,12 +1013,14 @@ function unhighlightAll() {
 		.attr('fill', '#323639');
 }
 
+// per evidenziare un certo insieme di piloti
 function highlightDrivers(driversList) {
 	for (var i in driversList) {
 		highlight(driversList[i])
 	}
 }
 
+// per aggiungere l'immagine per i final standings
 function addDriversHeaderElements() {
 	var gDriverHeader = viz.append('g')
 		.attr('id','driversHeader')
@@ -1025,14 +1039,11 @@ function addDriversHeaderElements() {
 	gDriverHeader.append('text')
 		.attr('id','driversHeader')
 		.attr('x','10')
-		.attr('y','10')
-
-	// viz.select('#driversHeader')
-	gDriverHeader.append('tspan')
-		.text('test');
+		.attr('y','10');
 
 }
 
+// aggiunge il bottone per deselezionare tutti i piloti selezionati
 function addClearSelectionBtn() {
 	rectHeight = DRIVER_RECT.rectHeight-6;
 	var gClearSelection = viz.append('g')
@@ -1100,6 +1111,7 @@ function showSeasonProblemsDistr(){
 	$("path.position-triangle-down[stroke='red']").parent("g.position").removeClass("hidden dimmed-elem");
 }
 
+// evidenzia i problemi rimuovendo gli elementi non necessari (per il filtro season problem distribution)
 function showSeasonProblemsDistrNEW(){
     $("#constructorSelect").val('');
     unhighlightAll();
@@ -1120,6 +1132,7 @@ function showSeasonProblemsDistrNEW(){
 
 }
 
+// ripristina la visualizzazione originale
 function reselectPathAndUnhighlightProblem(){
 
     viz.selectAll('g.problem')
