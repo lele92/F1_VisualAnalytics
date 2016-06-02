@@ -27,7 +27,6 @@ const POSITION_CIRCLES = {
 		'withStatus': 5
 	}
 };
-
 const PROBLEM_CIRCLES = {
     'radius': {
         'plain': 0,
@@ -185,7 +184,6 @@ $(document).ready(function() {
 		unhighlightAll();
 		var opt = $(this).val();
 		constructorDrivers = findConstructorDrivers(opt, drivers);
-		console.log(constructorDrivers);
 		highlightDrivers(constructorDrivers);
 	});
 });
@@ -216,7 +214,7 @@ function buildViz() {
     }
 
 	addDriversHeaderElements();
-	addClearSelctionBtn();
+	addClearSelectionBtn();
 
 }
 
@@ -231,17 +229,8 @@ function addDriversStandingsRect() {
 		.attr('rx','10')
 }
 
-function addTopLine() {
-	viz.append('line')
-		.attr('id','topLine')
-		.attr('x1',0)
-		.attr('y1',0)
-		.attr('x2',WIDTH)
-		.attr('y2',0);
-}
-
 function addPositionElements(driverId, driverFinalPosition, res, standings) {
-	viz.selectAll("g.position."+driverId+"."+HIGHLIGHT_STATUS_CLASSES.plain)
+	var gPositions = viz.selectAll("g.position."+driverId+"."+HIGHLIGHT_STATUS_CLASSES.plain)
 		.data(res)
 		.enter()
 		.append("g")
@@ -315,13 +304,12 @@ function addPositionElements(driverId, driverFinalPosition, res, standings) {
 			)
 		});
 
-	viz.selectAll("g.position."+driverId)
-		.append("circle")
+	// viz.selectAll("g.position."+driverId)
+	gPositions.append("circle")
 		.filter(function(d) {
 			if (parseInt(d.round)==1) return true;//se è la prima gara ovviamente non ci sono variazioni
 			var curPos = parseInt(getStandingsPosition(parseInt(d.round)-1, standings, d.RoundResult.Driver.driverId))    //-1 perchè round parte da 1 e non da 0
 			var prevPos = parseInt(getStandingsPosition(parseInt(d.round)-2, standings, d.RoundResult.Driver.driverId))
-			// console.log("----------"+curPos+"   "+prevPos)
 			if (curPos == -1 || prevPos == -1) return true;     // se una delle due posizioni non è definita, non c'è confronto
 
 			if (curPos == prevPos) {
@@ -337,8 +325,8 @@ function addPositionElements(driverId, driverFinalPosition, res, standings) {
 			return d3.rgb(SCALES.colors(parseInt(driverFinalPosition))).darker();
 		})
 
-	viz.selectAll("g.position."+driverId)
-		.append("path")
+	// viz.selectAll("g.position."+driverId)
+	gPositions.append("path")
 		.filter(function(d) {
 			if (parseInt(d.round)==1) return false;
 			var curPos = parseInt(getStandingsPosition(parseInt(d.round)-1, standings, d.RoundResult.Driver.driverId))    //-1 perchè round parte da 1 e non da 0
@@ -362,8 +350,8 @@ function addPositionElements(driverId, driverFinalPosition, res, standings) {
 		})
 		.attr('transform',"translate(0,-5)");
 
-	viz.selectAll("g.position."+driverId)
-		.append("path")
+	// viz.selectAll("g.position."+driverId)
+	gPositions.append("path")
 		.filter(function(d) {
 			if (parseInt(d.round)==1) return false;
 			var curPos = parseInt(getStandingsPosition(parseInt(d.round)-1, standings, d.RoundResult.Driver.driverId))    //-1 perchè round parte da 1 e non da 0
@@ -387,8 +375,8 @@ function addPositionElements(driverId, driverFinalPosition, res, standings) {
 		})
 		.attr('transform',"translate(0,5)");
 
-	viz.selectAll("g.position."+driverId)
-		.append('text')
+	// viz.selectAll("g.position."+driverId)
+	gPositions.append('text')
 		.attr('class','position-text')
 		.attr('text-anchor', 'middle')
 		.attr('dominant-baseline', 'central')
@@ -399,7 +387,6 @@ function addPositionElements(driverId, driverFinalPosition, res, standings) {
 
 	viz.selectAll("g.position."+driverId+" > .position-circle ,g.position."+driverId+" > .position-triangle-up ,g.position."+driverId+" > .position-triangle-down")
 		.filter(function(d) {
-			// console.log(d.RoundResult.status)
 			return d.RoundResult.status != "Finished";
 		})
 		.attr("stroke", function(d) {
@@ -480,7 +467,6 @@ function addProblemElements(circuitId, res) {
 
    circle.style('fill', '#3b4044')
         .filter(function(d) {
-            // console.log(d.RoundResult.status)
             return d.RoundResult.status != "Finished";
         })
         .attr("stroke", function(d) {
@@ -594,7 +580,7 @@ function addLightTickLines() {
 }
 
 function addGPElements() {
-	viz.selectAll("g.gp-element")
+	var gGpElements = viz.selectAll("g.gp-element")
 		.data(races)
 		.enter()
 		.append('g')
@@ -611,7 +597,6 @@ function addGPElements() {
 				.attr('fill', '#D62316');
 		})
         .on('click', function(d) {
-            console.log(d)
             var $modal_body = $("#modal-gp-body").empty();
             var iconText = "<i class='fa fa-chevron-right gplist'></i>";
             var spanClass = "class='labels'";
@@ -647,26 +632,7 @@ function addGPElements() {
         });
 
 	// viz.selectAll("g.gp-element")
-	// 	.data(races)
-	// 	.append('path')
-	// 	.attr('d', 'M'+GP_PATH.delta+' 0 L'+GP_PATH.rectWidth+' 0 L'+(GP_PATH.rectWidth-GP_PATH.delta)+' '+GP_PATH.rectHeight+' L 0 '+GP_PATH.rectHeight+' Z')
-	// 	.attr('fill','blue')
-	// 	.attr('transform',function(d) {
-	// 		return "translate(-"+((GP_PATH.rectWidth-GP_PATH.delta)-30)+",0)";
-	// 	});
-
-
-	// viz.selectAll("g.gp-element")
-	// 	.data(races)
-	// 	.append('circle')
-	// 	.attr('r', '2')
-	// 	.attr('fill','red')
-	// 	// .attr('transform',function(d) {
-	// 	// 	return "translate(-"+(GP_PATH.delta+(GP_PATH.rectWidth/2))+",0)";
-	// 	// });
-
-	viz.selectAll("g.gp-element")
-		.data(races)
+	gGpElements.data(races)
 		.append('rect')
 		.attr('class','gp-rect')
 		.attr('transform',"translate("+(-GP_SHAPE_WIDTH/2)+","+(-GPS_Y)+")")
@@ -678,8 +644,8 @@ function addGPElements() {
 			return d.Circuit.Location.country;
 		})
 
-	viz.selectAll("g.gp-element")
-		.data(races)
+	// viz.selectAll("g.gp-element")
+	gGpElements.data(races)
 		.append('text')
 		.attr('y',(GP_SHAPE_HEIGHT/2))
 		.attr('class','gp-label')
@@ -691,7 +657,7 @@ function addGPElements() {
 }
 
 function addDriversElements() {
-	viz.selectAll("g.driver-element."+HIGHLIGHT_STATUS_CLASSES.plain)
+	var gDriverElements = viz.selectAll("g.driver-element."+HIGHLIGHT_STATUS_CLASSES.plain)
 		.data(drivers)
 		.enter()
 		.append("g")
@@ -712,7 +678,7 @@ function addDriversElements() {
 			}
 		})
 
-	viz.selectAll("g.info-g")
+	var gInfoG = viz.selectAll("g.info-g")
 		.data(drivers)
 		.enter()
 		.append('g')
@@ -729,7 +695,6 @@ function addDriversElements() {
 				.attr('fill', '#656E75');
 		})
         .on('click', function(d) {
-            //console.log(d)
             var $modal_body = $("#modal-pilot-body").empty();
             var iconText = "<i class='fa fa-chevron-right pilotlist'></i>";
             var spanClass = "class='labels'";
@@ -781,24 +746,24 @@ function addDriversElements() {
             $("#myModal").modal('show');
         });
 
-	viz.selectAll("g.info-g")
-		.data(drivers)
+	// viz.selectAll("g.info-g")
+	gInfoG.data(drivers)
 		.append('circle')
 		.attr('class','info-circle')
 		.attr('fill', '#656E75')
 		.attr('r', '10');
 
 
-	viz.selectAll("g.info-g")
-		.data(drivers)
+	// viz.selectAll("g.info-g")
+	gInfoG.data(drivers)
 		.append('text')
 		.attr('class','driver-final-position')
 		.attr('text-anchor', 'middle')
 		.attr('dominant-baseline', 'central')
 		.text('i');
 
-	viz.selectAll("g.driver-element")
-		.data(drivers)
+	// viz.selectAll("g.driver-element")
+	gDriverElements.data(drivers)
 		.append("rect")
 		.attr("class","driver-rect")
 		.attr("rx","0")
@@ -811,8 +776,8 @@ function addDriversElements() {
 			return SCALES.colors(parseInt(d.position));
 		});
 
-	viz.selectAll("g.driver-element")
-		.data(drivers)
+	// viz.selectAll("g.driver-element")
+	gDriverElements.data(drivers)
 		.append('text')
 		.attr('class','driver-label')
 		.attr('y', DRIVER_RECT.rectHeight/2)
@@ -821,22 +786,22 @@ function addDriversElements() {
 			return data.familyName;
 		})
 
-	viz.selectAll("g.driver-element")
-		.data(drivers)
+	// viz.selectAll("g.driver-element")
+	var gFinalPosition = gDriverElements.data(drivers)
 		.append("g")                                //questi <g> servono per rendere possibile centrare le posizioni finali nei cerchi
 		.attr('class','final-position-g')
 		.attr("transform",function(data) {
 			return "translate(34,"+DRIVER_RECT.rectHeight/2+")"
 		});
 
-	viz.selectAll("g.final-position-g")
-		.data(drivers)
+	// viz.selectAll("g.final-position-g")
+	gFinalPosition.data(drivers)
 		.append('circle')
 		.attr('class','final-position-circle')
 		.attr('r', '12')
 	
-	viz.selectAll("g.final-position-g")
-		.data(drivers)
+	// viz.selectAll("g.final-position-g")
+	gFinalPosition.data(drivers)
 		.append('text')
 		.attr('class','driver-final-position')
 		.attr('text-anchor', 'middle')
@@ -906,7 +871,6 @@ function highlight(dId) {
 	viz.selectAll('path.results.'+HIGHLIGHT_STATUS_CLASSES.highlighted)
 		.attr('stroke-width', PATH_STROKE.highlighted)
 		.style('stroke', function(d){
-			console.log(d.position)
 			return SCALES.colorsHighlight[parseInt(d.position)-1]
 		});
 
@@ -1044,40 +1008,34 @@ function highlightDrivers(driversList) {
 }
 
 function addDriversHeaderElements() {
-	// viz.append('circle')
-	// 	.attr('r',2)
-	// 	.attr('fill','red')
-	// 	.attr('x',0)
-	// 	.attr('y',0)
-
-	viz.append('g')
+	var gDriverHeader = viz.append('g')
 		.attr('id','driversHeader')
 		.attr('transform',function(d) {
 			return "translate(12,6)";
 		})
 
-	viz.select('#driversHeader')
-		.append('image')
+	// viz.select('#driversHeader')
+	gDriverHeader.append('image')
 		.attr('id','helmetIcon')
 		.attr('xlink:href','img/f1_helmet_icon_2.png')
 		.attr('width','170')
 		.attr('height','49');
 
-	viz.select('#driversHeader')
-		.append('text')
+	// viz.select('#driversHeader')
+	gDriverHeader.append('text')
 		.attr('id','driversHeader')
 		.attr('x','10')
 		.attr('y','10')
 
-	viz.select('#driversHeader')
-		.append('tspan')
+	// viz.select('#driversHeader')
+	gDriverHeader.append('tspan')
 		.text('test');
 
 }
 
-function addClearSelctionBtn() {
+function addClearSelectionBtn() {
 	rectHeight = DRIVER_RECT.rectHeight-6;
-	viz.append('g')
+	var gClearSelection = viz.append('g')
 		.attr('id','clearSelectionG')
 		.attr("transform", "translate(10,"+ (HEIGHT-25) +")")
 		.on('click', function(d) {
@@ -1087,23 +1045,22 @@ function addClearSelctionBtn() {
 			unhighlightAll();
 		});
 
-	viz.select('g#clearSelectionG')
-		.append('rect')
+	// viz.select('g#clearSelectionG')
+	gClearSelection.append('rect')
 		.attr('id','clearSelectionBtn')
 		.attr("rx","0")
 		.attr("ry","10")
 		.attr("height", rectHeight)
 		.attr("width", '175');
 
-	viz.select('g#clearSelectionG')
-		.append('text')
+	// viz.select('g#clearSelectionG')
+	gClearSelection.append('text')
 		.attr('id','clearBtnLbl')
 		.attr('text-anchor', 'middle')
 		.attr('dominant-baseline', 'central')
 		.attr('y', rectHeight/2)
 		.attr('x', (175/2))
-		.text('Clear selection')
-		// .style('fill', );
+		.text('Clear selection');
 
 }
 
@@ -1128,7 +1085,6 @@ function showSeasonProblemsDistr(){
 	//cambia i colori
 	for (var i in drivers) {
 		//cambia colori position
-		console.log(i)
 		viz.selectAll('g.position.'+drivers[i].driverId+' circle.position-circle, '+
 			'g.position.'+drivers[i].driverId+' path.position-triangle-down, '+
 			'g.position.'+drivers[i].driverId+' path.position-triangle-up')
