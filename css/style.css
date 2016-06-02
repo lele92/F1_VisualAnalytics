@@ -167,6 +167,7 @@ g.info-g:hover {
     color: #656E75;
     vertical-align: middle;
     margin-top: 10px;
+    margin-right: 5px;
 }
 
 #tutorialBtn:hover {
@@ -420,4 +421,3 @@ img.constructor-img {
 #tutorial {
     margin-top: 40px;
 }
-
