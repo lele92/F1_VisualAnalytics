@@ -115,7 +115,6 @@ var races = [];
 var drivers = [];
 var standings = [];
 
-//todo: liste statiche, non generate dinamicamente
 var topThree = ['hamilton','rosberg','vettel'];
 var lastThree = ['merhi','rossi','stevens'];
 var rollerCoaster = ['massa'];
@@ -361,7 +360,7 @@ function addPositionElements(driverId, driverFinalPosition, res, standings) {
 		.style("fill", function(d) {
 			return d3.rgb(SCALES.colors(parseInt(driverFinalPosition))).darker();
 		})
-		.attr('transform',"translate(0,-5)");   //todo: fix provvisorio
+		.attr('transform',"translate(0,-5)");
 
 	viz.selectAll("g.position."+driverId)
 		.append("path")
@@ -386,7 +385,7 @@ function addPositionElements(driverId, driverFinalPosition, res, standings) {
 		.style("fill", function(d) {
 			return d3.rgb(SCALES.colors(parseInt(driverFinalPosition))).darker();
 		})
-		.attr('transform',"translate(0,5)");   //todo: fix provvisorio
+		.attr('transform',"translate(0,5)");
 
 	viz.selectAll("g.position."+driverId)
 		.append('text')
@@ -453,7 +452,7 @@ function addProblemElements(circuitId, res) {
         })
         .attr('class','hidden problem '+circuitId+" "+HIGHLIGHT_STATUS_CLASSES.plain)
         .attr('transform',function(d) {
-            return "translate("+SCALES.xGPs(parseInt(d.round))+","+SCALES.y(parseInt(d.RoundResult.problemPosition))+")";
+            return "translate("+SCALES.xGPs(parseInt(d.round))+","+SCALES.y(parseInt(d.RoundResult.problemPosition)+1)+")";
         })
         .on('mouseenter', function(d) {
             d3.select($(this).children('circle.position-circle').get(0)).attr('r', PROBLEM_CIRCLES.radius.mouseover)        //un bel magheggio, converto prima i noggetto jquery per prendermi i figli, poi in semplice oggetto dom da passare alla select... jquery magic
@@ -510,8 +509,7 @@ function addDriverResultsPath() {
 			var pts = [];
 			if (d.Results) {
 				pts[0] = "M"+(DRIVERS_X-82)+ ' ' +(SCALES.y(parseInt(d.position)));
-				pts[1] = "L"+(DRIVERS_X-60) + ' ' + (SCALES.y(parseInt(d.position))); //todo: aggiungere curva bezier
-				// pts[2] = "S"+ (DRIVERS_X-90) + ' ' + (SCALES.y(parseInt(d.position))) + ", " +(DRIVERS_X-60) + ' ' + (SCALES.y(parseInt(d.position))); //todo: aggiungere curva bezier
+				pts[1] = "L"+(DRIVERS_X-60) + ' ' + (SCALES.y(parseInt(d.position)));
 				for (var i=0; i< d.Results.length; i++) {
 					// console.log("round: "+ d.Results[i].round + " - position: " + d.Results[i].RoundResult.position);
 					pts[i+2] = "S"+ (SCALES.xGPs(parseInt(d.Results[i].round))-60) + ' ' + (SCALES.y(parseInt(d.Results[i].RoundResult.position))) + ", " +SCALES.xGPs(parseInt(d.Results[i].round)) + ' ' + SCALES.y(parseInt(d.Results[i].RoundResult.position));
@@ -520,7 +518,6 @@ function addDriverResultsPath() {
 			return pts.join(' ');
 		})
 		.on('click', function(d) {
-			//todo: si può implementare meglio
 			var selectedElem = d3.select(this);
 			if(selectedElem.classed(HIGHLIGHT_STATUS_CLASSES.plain) || selectedElem.classed(HIGHLIGHT_STATUS_CLASSES.dimmed)) {
 				highlight(d.driverId, selectedElem);
@@ -859,15 +856,37 @@ function confScales() {
 
 	SCALES.y = d3.scale.linear()
 		.domain([1, drivers.length]) //il dominio parte da 1 e non da 0 così possiamo utilizzare direttamente le posizioni della classifica finale (che partono da 1 ovviamente)
-		.range([INSETS.top, HEIGHT - INSETS.bottom]); //todo: da migliorare
+		.range([INSETS.top, HEIGHT - INSETS.bottom]);
 
 	SCALES.colors = d3.scale.linear().domain([1,(drivers.length-1)/2,drivers.length-1]).range(['#009933','#FFFFFF', '#ff3333']).interpolate(d3.interpolateRgb);
-	SCALES.colorsHighlight = d3.scale.category20();    //todo: cambiare colori
+	//SCALES.colorsHighlight = d3.scale.category20();    //todo: cambiare colori
+	SCALES.colorsHighlight = [
+		'#17becf', // mercedes
+		'#9edae5',
+		'#d62728', // ferrari
+		'#ff9896',
+		'#7f7f7f', // williams
+		'#c7c7c7',
+		'#1f77b4', // red bull
+		'#aec7e8',
+		'#ff7f0e', // force india
+	 	'#ffbb78',
+		'#bcbd22',
+	 	'#9467bd',
+	 	'#e377c2',
+	 	'#dbdb8d',
+	 	'#c5b0d5',
+	 	'#8c564b',
+	 	'#c49c94',
+	 	'#f7b6d2',
+	 	'#2ca02c',
+	 	'#98df8a',
+	 	'#2C8B7A'
+	]
 }
 
 //todo: sicuramente ci sono modi più efficienti di farlo, ma avendo a che fare con pochi elementi (circa 20 piloti, 20 gp, etc...) usare dei cicli e fare diversi selectAll non è un grosso problema e non si perde molto
 function highlight(dId) {
-	//todo: da rivedere e migliorare
     reselectPathAndUnhighlightProblem();
 
 	//assegna le classi in base alla selezione
@@ -889,7 +908,7 @@ function highlight(dId) {
 		.attr('stroke-width', PATH_STROKE.highlighted)
 		.style('stroke', function(d){
 			console.log(d.position)
-			return SCALES.colorsHighlight(parseInt(d.position))
+			return SCALES.colorsHighlight[parseInt(d.position)-1]
 		});
 
 	//cambia colore driver label
@@ -911,14 +930,14 @@ function highlight(dId) {
 					 'g.position.'+HIGHLIGHT_STATUS_CLASSES.highlighted+'.'+drivers[i].driverId+' path.position-triangle-down, '+
 					 'g.position.'+HIGHLIGHT_STATUS_CLASSES.highlighted+'.'+drivers[i].driverId+' path.position-triangle-up')
 			.style('fill', function(d){
-				return d3.rgb(SCALES.colorsHighlight(parseInt(drivers[i].position))).darker();
+				return d3.rgb(SCALES.colorsHighlight[parseInt(drivers[i].position)-1]).darker();
 			});
 
 		//cambia colori driver elements
 		viz.selectAll('g.driver-element.'+HIGHLIGHT_STATUS_CLASSES.highlighted+'.'+drivers[i].driverId+' rect , '+
 					'g.driver-element.'+HIGHLIGHT_STATUS_CLASSES.highlighted+'.'+drivers[i].driverId+' g text')
 			.style('fill', function(d){
-				return d3.rgb(SCALES.colorsHighlight(parseInt(drivers[i].position))).darker();
+				return d3.rgb(SCALES.colorsHighlight[parseInt(drivers[i].position)-1]).darker();
 			});
 	}
 

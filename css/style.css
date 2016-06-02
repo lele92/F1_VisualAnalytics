@@ -166,7 +166,7 @@ g.info-g:hover {
     font-size: 20px;
     color: #656E75;
     vertical-align: middle;
-    margin: 10px;
+    margin-top: 10px;
 }
 
 #tutorialBtn:hover {
@@ -411,5 +411,13 @@ img.driver-img {
 
 img.constructor-img {
     margin-top: 30px;
+}
+
+#legend-note {
+    margin-top: 20 px;
+}
+
+#tutorial {
+    margin-top: 40px;
 }
 
